@@ -9,7 +9,7 @@ const digits = (value: string | undefined) => (value ?? '').replace(/\D/g, '');
 export const SITE = {
   /** Descritor textual exibido no cabeçalho (não é marca nem logotipo). */
   descriptor: 'Consórcios',
-  descriptorDetail: 'Imóveis · Veículos',
+  descriptorDetail: 'Imóveis e veículos',
   whatsappNumber: digits(env.VITE_WHATSAPP_NUMBER),
   leadApiUrl: (env.VITE_LEAD_API_URL ?? '').trim(),
   gtmId: (env.VITE_GTM_ID ?? '').trim(),

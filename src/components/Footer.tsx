@@ -19,11 +19,8 @@ export function Footer() {
       <div className="mx-auto max-w-[90rem] px-5 md:px-10">
         <div className="grid grid-cols-1 gap-10 border-t border-offwhite/10 pt-10 md:grid-cols-12">
           <div className="md:col-span-4">
-            <p className="flex items-baseline gap-3 font-display text-base font-semibold text-offwhite">
-              {SITE.descriptor}
-              <span aria-hidden="true" className="size-1.5 bg-copper" />
-            </p>
-            <p className="label mt-2">{SITE.descriptorDetail}</p>
+            <p className="font-display text-base font-semibold text-offwhite">{SITE.descriptor}</p>
+            <p className="mt-1 text-sm">{SITE.descriptorDetail}</p>
           </div>
           <nav aria-label="Rodapé" className="md:col-span-4">
             <ul className="grid grid-cols-2 gap-y-3 text-sm">
@@ -45,9 +42,9 @@ export function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col gap-3 text-xs md:flex-row md:items-center md:justify-between md:pr-20">
-          <p>© {new Date().getFullYear()} · Fotografias: Unsplash</p>
+          <p>© {new Date().getFullYear()}. Fotografias: Unsplash.</p>
           {pending.length > 0 && (
-            <p className="label text-copper">Modo demonstração — configurar {pending.join(' e ')}</p>
+            <p className="label text-champagne">Modo demonstração: configure {pending.join(' e ')}.</p>
           )}
         </div>
       </div>

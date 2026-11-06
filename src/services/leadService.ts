@@ -94,7 +94,7 @@ export async function submitLead(input: LeadInput): Promise<SubmitResult> {
   const payload = buildLeadPayload(input);
 
   if (!isLeadApiConfigured) {
-    if (import.meta.env.DEV) console.info('[lead] modo demonstração — payload:', payload);
+    if (import.meta.env.DEV) console.info('[lead] modo demonstração, payload:', payload);
     return { status: 'demo', payload };
   }
 

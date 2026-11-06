@@ -32,7 +32,7 @@ export function PlanSelector({ value, onChange }: Props) {
 
   return (
     <div role="radiogroup" aria-label="Plano de consórcio" className="border-t border-charcoal/15">
-      {PLAN_ORDER.map((id, i) => {
+      {PLAN_ORDER.map((id) => {
         const active = id === value;
         const plan = PLANS[id];
         return (
@@ -48,7 +48,7 @@ export function PlanSelector({ value, onChange }: Props) {
             onClick={() => onChange(id)}
             onKeyDown={onKey}
             className={cn(
-              'group relative grid w-full grid-cols-[2.25rem_1fr_auto] items-baseline gap-x-2 border-b border-charcoal/15 py-4 text-left transition-colors duration-500 md:py-5',
+              'group relative grid w-full grid-cols-[1fr_auto] items-baseline gap-x-4 border-b border-charcoal/15 py-4 text-left transition-colors duration-500 md:py-5',
               active ? 'text-charcoal' : 'text-charcoal/45 hover:text-charcoal/75',
             )}
           >
@@ -59,10 +59,7 @@ export function PlanSelector({ value, onChange }: Props) {
                 active ? 'w-full' : 'w-0',
               )}
             />
-            <span className={cn('tabular text-xs font-semibold transition-colors', active ? 'text-wood' : 'text-current')}>
-              {String(i + 1).padStart(2, '0')}
-            </span>
-            <span className="font-display text-[1.35rem] font-semibold tracking-[-0.025em] md:text-[1.6rem]">
+            <span className="font-display text-[1.3rem] font-semibold tracking-[-0.02em] md:text-[1.5rem]">
               {plan.label}
             </span>
             <span className="tabular text-right text-xs leading-snug md:text-sm">

@@ -58,7 +58,7 @@ export function CreditInput({ label, value, range, onChange, invalid }: Props) {
             const el = e.currentTarget;
             requestAnimationFrame(() => el.setSelectionRange(el.value.length, el.value.length));
           }}
-          className="tabular w-full min-w-0 bg-transparent font-sans text-[clamp(2.6rem,11vw,4.6rem)] font-bold leading-none tracking-[-0.04em] text-offwhite caret-champagne outline-none placeholder:text-offwhite/20"
+          className="figure w-full min-w-0 bg-transparent font-sans text-[clamp(2.5rem,10.5vw,4.4rem)] font-bold leading-none tracking-[-0.04em] text-offwhite caret-champagne outline-none placeholder:text-offwhite/20"
         />
       </div>
 
@@ -66,7 +66,7 @@ export function CreditInput({ label, value, range, onChange, invalid }: Props) {
       <div className="relative mt-7">
         <input
           type="range"
-          aria-label={`${label} — controle deslizante`}
+          aria-label={`${label} (controle deslizante)`}
           aria-valuetext={`R$ ${formatReais(sliderValue)}`}
           min={range.min}
           max={range.max}

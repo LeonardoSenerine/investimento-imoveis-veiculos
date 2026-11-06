@@ -1,11 +1,9 @@
 import { useRef } from 'react';
-import { IMAGES } from '../config/images';
 import { cn } from '../lib/cn';
 import { ScrollTrigger, gsap } from '../motion/gsap';
 import { useMotion } from '../motion/useMotion';
 import { ButtonLink } from './ui/Button';
-import { StockImage } from './ui/StockImage';
-import { Label, Lines } from './ui/Type';
+import { Lines } from './ui/Type';
 
 const STEPS = [
   {
@@ -52,29 +50,21 @@ export function HowItWorks() {
       <div className="relative z-[2] mx-auto grid max-w-[90rem] grid-cols-1 gap-16 px-5 md:px-10 lg:grid-cols-12 lg:gap-x-12">
         <div className="lg:col-span-5">
           <div className="lg:sticky lg:top-32">
-            <Label index="03">Como funciona</Label>
             <h2
               id="como-funciona-title"
               data-reveal="lines"
-              className="display mt-6 text-[clamp(2.5rem,10vw,3.4rem)] text-offwhite md:text-[clamp(3.2rem,5.4vw,5.2rem)]"
+              className="display text-[clamp(2.2rem,9.4vw,3rem)] text-offwhite md:text-[clamp(2.8rem,4.4vw,4.2rem)]"
             >
               <Lines
-                lines={['Um caminho', 'claro, etapa', <span key="p" className="text-champagne">por etapa.</span>]}
-                lineClassName={(i) => (i === 2 ? 'pl-[18%]' : '')}
+                lines={['Etapa', 'por etapa.']}
+                lineClassName={(i) => (i === 1 ? 'pl-[14%]' : '')}
               />
             </h2>
             <p className="mt-6 max-w-sm leading-relaxed text-offwhite/60">
               O consórcio é uma compra planejada. Entender cada fase ajuda você a decidir com segurança.
             </p>
-            {/* Detalhe arquitetônico: ritmo das ripas ecoa as etapas */}
-            <div data-reveal="image" className="relative mt-10 aspect-[16/7] overflow-hidden lg:aspect-[4/3] lg:max-w-md">
-              <div data-parallax="8" className="absolute inset-x-0 -top-[10%] h-[120%]">
-                <StockImage image={IMAGES.slats} sizes="(min-width: 1024px) 30vw, 100vw" className="h-full w-full object-cover" />
-              </div>
-              <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-charcoal/60 to-transparent" />
-            </div>
             <div className="mt-10 hidden max-w-xs lg:block">
-              <ButtonLink href="#simulador" variant="outline" fullWidth>
+              <ButtonLink href="#simulador" variant="outline" icon={false} fullWidth>
                 Fazer minha simulação
               </ButtonLink>
             </div>

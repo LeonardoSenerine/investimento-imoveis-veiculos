@@ -11,7 +11,6 @@ import { submitLead } from '../services/leadService';
 import type { SimulationSnapshot } from '../types';
 import { usePrivacy } from './privacy/PrivacyContext';
 import { Button, ButtonLink } from './ui/Button';
-import { Label } from './ui/Type';
 
 interface Props {
   snapshot: SimulationSnapshot | null;
@@ -158,7 +157,7 @@ export function LeadCaptureForm({ snapshot }: Props) {
           <h3
             ref={resultHeadingRef}
             tabIndex={-1}
-            className="display mt-6 text-[clamp(2rem,4.6vw,3.6rem)] text-charcoal outline-none"
+            className="display mt-6 text-[clamp(1.8rem,4vw,3.2rem)] text-charcoal outline-none"
           >
             {demo ? 'Cadastro não enviado: integração pendente.' : `Recebemos seus dados, ${firstName}.`}
           </h3>
@@ -170,8 +169,8 @@ export function LeadCaptureForm({ snapshot }: Props) {
               : 'Um especialista vai entrar em contato pelo WhatsApp informado para apresentar as condições disponíveis. Se preferir, continue a conversa agora.'}
           </p>
           <p className="tabular mt-6 border-l border-copper pl-4 text-sm text-charcoal/55">
-            {status.sent.planLabel} · {formatCents(status.sent.creditCents)} · {status.sent.termMonths} meses ·
-            parcela estimada de {formatCents(status.sent.installmentCents)}
+            {status.sent.planLabel}, crédito de {formatCents(status.sent.creditCents)} em {status.sent.termMonths}{' '}
+            meses, parcela estimada de {formatCents(status.sent.installmentCents)}
           </p>
           <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
             <ButtonLink
@@ -202,10 +201,7 @@ export function LeadCaptureForm({ snapshot }: Props) {
   return (
     <div className={wrapper}>
       <div className="lg:col-span-5">
-        <Label tone="light">Próximo passo</Label>
-        <h3 className="display mt-6 text-[clamp(2.3rem,5vw,4.2rem)] text-charcoal">
-          Gostou dessa <span className="text-wood">possibilidade?</span>
-        </h3>
+        <h3 className="display text-[clamp(2rem,4.4vw,3.6rem)] text-charcoal">Gostou dessa possibilidade?</h3>
         <p className="mt-6 max-w-md leading-relaxed text-charcoal/65">
           Deixe seus dados para receber mais informações e conversar com um especialista sobre as condições
           disponíveis.
@@ -234,7 +230,7 @@ export function LeadCaptureForm({ snapshot }: Props) {
         aria-describedby={`${id}-purpose`}
         className="flex flex-col lg:col-span-6 lg:col-start-7 lg:self-end"
       >
-        {!isLeadApiConfigured && <p className="label mb-8 text-wood">Modo demonstração · sem envio real</p>}
+        {!isLeadApiConfigured && <p className="label mb-8 text-wood">Modo demonstração: nenhum dado é enviado.</p>}
 
         <div className="space-y-8">
           <LineField

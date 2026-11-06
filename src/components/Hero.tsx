@@ -9,9 +9,9 @@ import { StockImage } from './ui/StockImage';
 import { Lines } from './ui/Type';
 
 const INDEX = [
-  { n: '01', label: 'Imóveis', meta: `${PLANS.imovel.termMonths} meses` },
-  { n: '02', label: 'Automóveis', meta: `desde ${formatReaisShort(PLANS.automovel.credit.min)}` },
-  { n: '03', label: 'Motocicletas', meta: `até ${formatReaisShort(PLANS.moto.credit.max)}` },
+  { label: 'Imóveis', meta: `${PLANS.imovel.termMonths} meses` },
+  { label: 'Automóveis', meta: `desde ${formatReaisShort(PLANS.automovel.credit.min)}` },
+  { label: 'Motocicletas', meta: `até ${formatReaisShort(PLANS.moto.credit.max)}` },
 ];
 
 export function Hero() {
@@ -83,19 +83,17 @@ export function Hero() {
         data-hero-content
         className="relative z-[2] mx-auto flex h-full max-w-[90rem] flex-col px-5 pb-5 pt-24 md:px-10 md:pb-10 md:pt-32"
       >
-        {/* Linha superior: etiqueta editorial e índice das categorias */}
+        {/* Linha superior: o que é a página e as categorias atendidas */}
         <div className="flex items-start justify-between gap-8">
-          <p data-hero-fade className="label whitespace-nowrap !text-[0.58rem] !tracking-[0.2em] text-offwhite/70 sm:!text-[0.68rem] sm:!tracking-[0.26em]">
-            Planejamento <span className="text-copper">•</span> Conquistas <span className="text-copper">•</span>{' '}
-            Possibilidades
+          <p data-hero-fade className="max-w-[16rem] text-sm leading-snug text-offwhite/70">
+            Consórcio de imóveis, automóveis e motocicletas
           </p>
           <ol data-hero-fade className="hidden min-w-[16rem] bg-charcoal/55 px-5 py-3 backdrop-blur-md md:block" aria-label="Categorias">
             {INDEX.map((item) => (
               <li
-                key={item.n}
-                className="grid grid-cols-[2rem_1fr_auto] items-baseline gap-x-3 border-b border-offwhite/12 py-2 text-sm last:border-b-0"
+                key={item.label}
+                className="flex items-baseline justify-between gap-x-6 border-b border-offwhite/12 py-2 text-sm last:border-b-0"
               >
-                <span className="tabular text-[0.65rem] text-copper">{item.n}</span>
                 <span className="font-medium text-offwhite/85">{item.label}</span>
                 <span className="tabular text-xs text-offwhite/45">{item.meta}</span>
               </li>
@@ -107,14 +105,14 @@ export function Hero() {
         <h1
           id="hero-title"
           data-hero-title
-          className="display my-auto pt-10 text-[clamp(2.3rem,9.4vw,3.6rem)] text-offwhite [text-shadow:0_2px_32px_rgb(21_21_21/0.45)] md:text-[clamp(4rem,8.2vw,8.4rem)]"
+          className="display my-auto pt-10 text-[clamp(2rem,8.6vw,3.2rem)] text-offwhite [text-shadow:0_2px_32px_rgb(21_21_21/0.45)] md:text-[clamp(3.4rem,7vw,7.4rem)]"
         >
           <Lines
             lines={[
               'Seu próximo',
               'objetivo começa',
               'com uma boa',
-              <span key="e" className="text-champagne">escolha.</span>,
+              'escolha.',
             ]}
             lineClassName={(i) => (i === 1 ? 'md:pl-[9%]' : i === 3 ? 'pl-[22%] md:pl-[40%]' : '')}
           />
@@ -129,7 +127,7 @@ export function Hero() {
               orientação em cada etapa.
             </p>
             <div data-hero-fade className="hidden xl:col-span-3 xl:block">
-              <p className="label text-copper">Resultado na hora</p>
+              <p className="label text-champagne">Resultado na hora</p>
               <p className="mt-2 text-sm leading-relaxed text-offwhite/55">
                 Simule sem cadastro e veja a parcela estimada enquanto ajusta o valor.
               </p>

@@ -15,8 +15,10 @@
   --color-alert: #e59b85;
   --color-alert-dark: #a4452c;
 
-  --font-display: 'Sora', ui-sans-serif, system-ui, sans-serif;
-  --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  /* Uma família, duas larguras: expandida nos títulos (emblema automotivo,
+     letreiro de arquitetura), normal no texto corrido. */
+  --font-display: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Archivo', ui-sans-serif, system-ui, sans-serif;
 
   --ease-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -76,14 +78,18 @@
 }
 
 @layer components {
-  /* Rótulo editorial pequeno, caixa alta, espaçado */
+  /* Rótulo funcional pequeno, em caixa normal */
   .label {
     font-family: var(--font-sans);
-    font-size: 0.68rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    letter-spacing: 0.26em;
-    text-transform: uppercase;
+    letter-spacing: 0.005em;
     line-height: 1.4;
+  }
+
+  /* Archivo expandida em todo texto de display */
+  .font-display {
+    font-stretch: 112%;
   }
 
   .tabular {
@@ -94,9 +100,16 @@
   /* Display: títulos de grande escala */
   .display {
     font-family: var(--font-display);
+    font-stretch: 118%;
     font-weight: 600;
-    letter-spacing: -0.045em;
-    line-height: 0.98;
+    letter-spacing: -0.035em;
+    line-height: 0.96;
+  }
+
+  /* Números de instrumento: levemente expandidos e alinhados */
+  .figure {
+    font-stretch: 108%;
+    font-variant-numeric: tabular-nums;
   }
 
   /* Máscara de linha para "line reveal" */
@@ -141,7 +154,7 @@
     background-size: 100% 1px;
   }
 
-  /* Slider de crédito — instrumento de precisão */
+  /* Slider de crédito: instrumento de precisão */
   .range {
     --pct: 50%;
     appearance: none;

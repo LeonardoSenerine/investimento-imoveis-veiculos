@@ -14,7 +14,7 @@ export function VehicleSimulator({ kind, value, onChange, invalid }: Props) {
     <>
       <CreditInput
         key={kind}
-        label={`Valor do crédito — ${plan.label.toLowerCase()}`}
+        label={`Valor do crédito para ${plan.noun}`}
         value={value}
         range={plan.credit}
         onChange={onChange}

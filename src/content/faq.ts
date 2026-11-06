@@ -36,14 +36,14 @@ export const FAQ: FaqItem[] = [
   {
     q: 'As parcelas podem sofrer reajustes?',
     a: [
-      'Sim. O valor do crédito e das parcelas costuma ser atualizado periodicamente para acompanhar o preço do bem, por um índice ou critério definido em contrato — por exemplo, INCC ou IPCA em planos de imóveis, ou a variação de preço de referência em planos de veículos.',
+      'Sim. O valor do crédito e das parcelas costuma ser atualizado periodicamente para acompanhar o preço do bem, por um índice ou critério definido em contrato. Em planos de imóveis é comum o uso do INCC ou do IPCA; em planos de veículos, a variação do preço de referência.',
     ],
   },
   {
     q: 'Como funciona a contratação?',
     a: [
       'Depois de escolher o plano, você recebe as condições detalhadas e, se decidir seguir, assina a proposta de adesão a um grupo de uma administradora autorizada.',
-      'Documentos e análise de crédito são solicitados pela administradora conforme suas regras — normalmente no momento de utilizar a carta de crédito. Este site oferece orientação comercial e não é uma administradora de consórcios.',
+      'Documentos e análise de crédito são solicitados pela administradora conforme suas regras, normalmente no momento de utilizar a carta de crédito. Este site oferece orientação comercial e não é uma administradora de consórcios.',
     ],
   },
   {

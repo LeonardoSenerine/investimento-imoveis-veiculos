@@ -1,4 +1,3 @@
-import { ArrowRight } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { IMAGES, type StockImage as Img } from '../config/images';
 import { PLANS, type Category, type VehicleKind } from '../config/simulators';
@@ -6,7 +5,7 @@ import { cn } from '../lib/cn';
 import { formatReaisShort } from '../lib/money';
 import { Button } from './ui/Button';
 import { StockImage } from './ui/StockImage';
-import { Label, Words } from './ui/Type';
+import { Words } from './ui/Type';
 
 interface Props {
   onSelect: (category: Category, vehicleKind?: VehicleKind) => void;
@@ -50,34 +49,27 @@ export function GoalSelector({ onSelect }: Props) {
     <section id="objetivo" aria-labelledby="objetivo-title" className="relative bg-charcoal pb-28 pt-24 md:pb-44 md:pt-40">
       <div className="mx-auto max-w-[90rem] px-5 md:px-10">
         {/* Manifesto: as palavras acendem no ritmo da leitura */}
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
-          <div className="md:col-span-3">
-            <Label index="01">Objetivo</Label>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-12">
           <h2
             id="objetivo-title"
             data-reveal="words"
-            className="font-display text-[clamp(1.55rem,3.7vw,3.35rem)] font-medium leading-[1.14] tracking-[-0.03em] text-offwhite md:col-span-9"
+            className="font-display text-[clamp(1.45rem,3.3vw,3rem)] font-medium leading-[1.16] tracking-[-0.025em] text-offwhite md:col-span-10 md:col-start-3"
           >
             <Words
-              text="Consórcio é uma compra planejada. Você escolhe o objetivo, entende as condições e decide no seu tempo — com orientação em cada etapa."
-              highlight={['planejada']}
+              text="Consórcio é uma compra planejada. Você escolhe o objetivo, entende as condições e decide no seu tempo, com orientação em cada etapa." 
             />
           </h2>
         </div>
 
-        {/* Capítulo 01 — Imóveis: foto larga à esquerda, palavra cruzando a borda inferior */}
+        {/* Capítulo Imóveis: foto larga à esquerda, palavra cruzando a borda inferior */}
         <article className="group relative mt-24 grid grid-cols-1 md:mt-40 md:grid-cols-12 md:gap-x-10">
           <div className="relative md:col-span-8">
             <Photo image={IMAGES.property} sizes="(min-width: 768px) 62vw, 100vw" className="aspect-[4/5] md:aspect-[16/11]">
               <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-charcoal/75 via-transparent via-45% to-charcoal/25" />
-              <p className="label absolute left-5 top-5 text-offwhite/80 md:left-8 md:top-8">
-                <span className="text-champagne">01</span> &nbsp;/&nbsp; Imóveis
-              </p>
             </Photo>
             <span
               aria-hidden="true"
-              className="display pointer-events-none absolute -bottom-[0.5em] left-3 text-[clamp(4.2rem,15vw,12.5rem)] text-offwhite md:left-8"
+              className="display pointer-events-none absolute -bottom-[0.5em] left-3 text-[clamp(3.6rem,14vw,11rem)] text-offwhite md:left-8"
             >
               Imóveis
             </span>
@@ -98,6 +90,7 @@ export function GoalSelector({ onSelect }: Props) {
             />
             <Button
               variant="outline"
+              icon={false}
               fullWidth
               className="z-[6] mt-8"
               onClick={() => onSelect('property')}
@@ -115,20 +108,17 @@ export function GoalSelector({ onSelect }: Props) {
           />
         </article>
 
-        {/* Capítulo 02 — Veículos: espelhado, palavra cruzando a borda superior */}
+        {/* Capítulo Veículos: espelhado, palavra cruzando a borda superior */}
         <article className="group relative mt-32 grid grid-cols-1 md:mt-52 md:grid-cols-12 md:gap-x-10">
           <div className="relative md:order-2 md:col-span-6 md:col-start-7 lg:col-span-5 lg:col-start-7">
             <span
               aria-hidden="true"
-              className="display pointer-events-none absolute -top-[0.42em] right-3 z-10 text-[clamp(4.2rem,15vw,12.5rem)] text-offwhite md:right-8"
+              className="display pointer-events-none absolute -top-[0.42em] right-3 z-10 text-[clamp(3.6rem,14vw,11rem)] text-offwhite md:right-8"
             >
               Veículos
             </span>
             <Photo image={IMAGES.vehicle} sizes="(min-width: 768px) 45vw, 100vw" className="aspect-[4/5]">
               <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-charcoal/35 via-transparent via-40% to-charcoal/60" />
-              <p className="label absolute bottom-5 right-5 text-offwhite/80 md:bottom-8 md:right-8">
-                <span className="text-champagne">02</span> &nbsp;/&nbsp; Automóveis
-              </p>
             </Photo>
 
             {/* Fotografia sobreposta: a motocicleta avança sobre a borda e se move em outra velocidade */}
@@ -136,8 +126,8 @@ export function GoalSelector({ onSelect }: Props) {
               <div data-parallax="-10">
                 <figure className="relative shadow-[0_0_0_6px_#151515] md:shadow-[0_0_0_10px_#151515]">
                   <Photo image={IMAGES.motorcycle} sizes="(min-width: 768px) 20vw, 40vw" className="aspect-[3/4]" />
-                  <figcaption className="label absolute bottom-3 left-3 text-offwhite/85 md:bottom-4 md:left-4">
-                    <span className="text-champagne">03</span> &nbsp;/&nbsp; Motos
+                  <figcaption className="label absolute bottom-3 left-3 text-offwhite/90 md:bottom-4 md:left-4">
+                    Motocicletas
                   </figcaption>
                 </figure>
               </div>
@@ -149,7 +139,7 @@ export function GoalSelector({ onSelect }: Props) {
               Encontre uma possibilidade para seu próximo veículo.
             </h3>
 
-            {/* Escolha direta do tipo — linhas editoriais, não cards */}
+            {/* Escolha direta do tipo em linhas, não em cards */}
             <ul className="mt-8 border-t border-offwhite/12">
               {(
                 [
@@ -172,20 +162,18 @@ export function GoalSelector({ onSelect }: Props) {
                         {plan.label}
                       </span>
                       <span className="tabular mt-0.5 block text-sm text-offwhite/50">
-                        {range} · {plan.termMonths} meses
+                        {range}, prazo de {plan.termMonths} meses
                       </span>
                     </span>
-                    <ArrowRight
-                      aria-hidden="true"
-                      className="size-5 text-offwhite/60 transition-transform duration-500 ease-[var(--ease-expo)] group-hover/row:translate-x-1.5 group-hover/row:text-champagne"
-                      strokeWidth={1.5}
-                    />
+                    <span className="link-draw text-sm font-semibold text-offwhite/60 transition-colors group-hover/row:text-champagne">
+                      Simular
+                    </span>
                   </button>
                 </li>
               ))}
             </ul>
 
-            <Button variant="outline" fullWidth className="mt-8" onClick={() => onSelect('vehicle')}>
+            <Button variant="outline" icon={false} fullWidth className="mt-8" onClick={() => onSelect('vehicle')}>
               Simular consórcio de veículos
             </Button>
           </div>

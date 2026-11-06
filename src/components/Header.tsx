@@ -6,10 +6,10 @@ import { cn } from '../lib/cn';
 import { ButtonLink } from './ui/Button';
 
 const LINKS = [
-  { id: 'objetivo', label: 'Objetivos', index: '01' },
-  { id: 'simulador', label: 'Simulador', index: '02' },
-  { id: 'como-funciona', label: 'Como funciona', index: '03' },
-  { id: 'duvidas', label: 'Dúvidas', index: '04' },
+  { id: 'objetivo', label: 'Objetivos' },
+  { id: 'simulador', label: 'Simulador' },
+  { id: 'como-funciona', label: 'Como funciona' },
+  { id: 'duvidas', label: 'Dúvidas' },
 ];
 
 /** Fio de progresso de leitura (segue a rolagem nativa, sem animação própria). */
@@ -60,8 +60,9 @@ export function Header() {
           <span className="font-display text-[0.98rem] font-semibold tracking-[-0.02em] text-offwhite">
             {SITE.descriptor}
           </span>
-          <span aria-hidden="true" className="size-1.5 translate-y-[-0.1em] bg-copper" />
-          <span className="label hidden whitespace-nowrap text-offwhite/40 sm:inline">{SITE.descriptorDetail}</span>
+          <span className="hidden whitespace-nowrap text-sm text-offwhite/45 sm:inline">
+            {SITE.descriptorDetail.toLowerCase()}
+          </span>
         </a>
 
         <nav aria-label="Seções da página" className="hidden xl:block">
@@ -78,14 +79,6 @@ export function Header() {
                       isActive ? 'text-offwhite' : 'text-offwhite/50 hover:text-offwhite',
                     )}
                   >
-                    <span
-                      className={cn(
-                        'tabular text-[0.62rem] transition-colors duration-500',
-                        isActive ? 'text-copper' : 'text-offwhite/30',
-                      )}
-                    >
-                      {l.index}
-                    </span>
                     {l.label}
                     <span
                       aria-hidden="true"
@@ -101,7 +94,7 @@ export function Header() {
           </ul>
         </nav>
 
-        <ButtonLink href="#simulador" variant={scrolled ? 'primary' : 'outline'} size="md" className="!min-h-10 md:!min-h-11 !text-[0.85rem]">
+        <ButtonLink href="#simulador" variant={scrolled ? 'primary' : 'outline'} size="md" icon={false} className="!min-h-10 md:!min-h-11 !text-[0.85rem]">
           Simular
         </ButtonLink>
       </div>

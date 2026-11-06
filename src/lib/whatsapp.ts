@@ -18,9 +18,9 @@ export function simulationMessage(snapshot: SimulationSnapshot, name?: string): 
   return [
     greeting,
     `Fiz uma simulação de consórcio de ${snapshot.planNoun} no site:`,
-    `• Crédito: ${formatCents(snapshot.creditCents)}`,
-    `• Prazo de referência: ${snapshot.termMonths} meses`,
-    `• Parcela estimada: ${formatCents(snapshot.installmentCents)}`,
+    `Crédito: ${formatCents(snapshot.creditCents)}`,
+    `Prazo de referência: ${snapshot.termMonths} meses`,
+    `Parcela estimada: ${formatCents(snapshot.installmentCents)}`,
     'Gostaria de conhecer as condições disponíveis.',
   ].join('\n');
 }

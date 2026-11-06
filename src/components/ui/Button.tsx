@@ -147,17 +147,3 @@ export function Button({
     </button>
   );
 }
-
-/** Link textual com sublinhado desenhado e seta que avança. */
-export function TextArrow({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <span className={cn('inline-flex items-center gap-3 font-display font-semibold', className)}>
-      <span className="link-draw pb-0.5">{children}</span>
-      <ArrowRight
-        aria-hidden="true"
-        className="size-4 transition-transform duration-500 ease-[var(--ease-expo)] group-hover:translate-x-1.5"
-        strokeWidth={1.75}
-      />
-    </span>
-  );
-}

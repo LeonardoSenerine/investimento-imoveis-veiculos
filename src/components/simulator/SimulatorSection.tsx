@@ -17,7 +17,7 @@ import { useMotion } from '../../motion/useMotion';
 import type { GoalSelection, SimulationSnapshot } from '../../types';
 import { LeadCaptureForm } from '../LeadCaptureForm';
 import { StockImage } from '../ui/StockImage';
-import { Label, Lines } from '../ui/Type';
+import { Lines } from '../ui/Type';
 import { PlanSelector, PLAN_ORDER } from './PlanSelector';
 import { PropertySimulator } from './PropertySimulator';
 import { SimulationResult } from './SimulationResult';
@@ -157,7 +157,6 @@ export function SimulatorSection({ goal }: Props) {
   });
 
   const invalid = outcome.status === 'out_of_range' || outcome.status === 'unvalidated_range';
-  const planIndex = String(PLAN_ORDER.indexOf(planId) + 1).padStart(2, '0');
 
   return (
     <section ref={root} id="simulador" aria-labelledby="simulador-title" className="relative bg-charcoal">
@@ -166,16 +165,13 @@ export function SimulatorSection({ goal }: Props) {
           {/* Contexto */}
           <div className="lg:col-span-5">
             <div className="lg:sticky lg:top-28">
-              <Label index="02" tone="light">
-                Simulação
-              </Label>
               <h2
                 id="simulador-title"
                 data-reveal="lines"
-                className="display mt-6 text-[clamp(2.5rem,10vw,3.4rem)] text-charcoal md:text-[clamp(3.2rem,5.6vw,5.4rem)]"
+                className="display text-[clamp(2.2rem,9.4vw,3rem)] text-charcoal md:text-[clamp(2.8rem,4.6vw,4.4rem)]"
               >
                 <Lines
-                  lines={['Quanto', 'você quer', <span key="c" className="text-wood">conquistar?</span>]}
+                  lines={['Quanto', 'você quer', 'conquistar?']}
                   lineClassName={(i) => (i === 1 ? 'pl-[12%]' : '')}
                 />
               </h2>
@@ -188,8 +184,7 @@ export function SimulatorSection({ goal }: Props) {
               </div>
 
               <p className="mt-8 hidden max-w-sm text-sm leading-relaxed text-charcoal/60 lg:block">
-                <span className="label mr-2 text-wood">Sem cadastro</span>
-                Seus dados só são pedidos se você quiser continuar o atendimento.
+                Simular não exige cadastro. Seus dados só são pedidos se você quiser continuar o atendimento.
               </p>
             </div>
           </div>
@@ -201,15 +196,6 @@ export function SimulatorSection({ goal }: Props) {
                 aria-hidden="true"
                 className="absolute inset-x-0 top-0 z-[2] h-px bg-gradient-to-r from-copper via-champagne/50 to-transparent"
               />
-              {/* Numeral do plano como elemento gráfico */}
-              <span
-                key={planId}
-                aria-hidden="true"
-                className="display numeral-outline pointer-events-none absolute -right-3 top-6 z-[3] animate-tick select-none text-[7rem] leading-none opacity-70 md:top-8 md:text-[12rem]"
-              >
-                {planIndex}
-              </span>
-
               <div aria-hidden="true" className="relative h-32 overflow-hidden sm:h-40 md:h-52">
                 {PLAN_ORDER.map((id) => (
                   <StockImage
@@ -229,8 +215,8 @@ export function SimulatorSection({ goal }: Props) {
               <div className="relative z-[2] -mt-10 p-5 pt-0 sm:p-8 sm:pt-0 md:-mt-12 md:p-12 md:pt-0">
                 <div className="mb-8 flex items-baseline justify-between gap-4">
                   <p className="font-display text-lg font-semibold tracking-[-0.02em]">{PLANS[planId].label}</p>
-                  <p className="label tabular text-offwhite/40">
-                    <span className="hidden sm:inline">Prazo de referência · </span>
+                  <p className="tabular text-sm text-offwhite/50">
+                    <span className="hidden sm:inline">Prazo de referência: </span>
                     {PLANS[planId].termMonths} meses
                   </p>
                 </div>
@@ -253,8 +239,7 @@ export function SimulatorSection({ goal }: Props) {
               </div>
             </div>
             <p className="mt-5 text-sm leading-relaxed text-charcoal/60 lg:hidden">
-              <span className="label mr-2 text-wood">Sem cadastro</span>
-              Seus dados só são pedidos se você quiser continuar.
+              Simular não exige cadastro. Seus dados só são pedidos se você quiser continuar.
             </p>
           </div>
 

@@ -54,18 +54,16 @@ function OkResult({
 
   return (
     <>
-      <div className="flex items-baseline justify-between gap-4">
-        <p className="label text-champagne">Parcela estimada</p>
-        <p className="label tabular text-offwhite/40">{outcome.termMonths} meses</p>
-      </div>
+      <p className="label text-champagne">Parcela estimada</p>
 
-      <p className="mt-5 flex items-start font-sans font-bold leading-[0.9] text-offwhite tabular" aria-hidden="true">
+      <p className="figure mt-5 flex items-start font-sans font-bold leading-[0.9] text-offwhite" aria-hidden="true">
         <span className="mr-2 mt-[0.4em] text-lg font-semibold text-offwhite/45 md:text-xl">R$</span>
         <span className="text-[clamp(3.4rem,15vw,6.4rem)] tracking-[-0.05em]">{int}</span>
         <span className="mt-[0.18em] text-[clamp(1.5rem,5.5vw,2.6rem)] tracking-[-0.03em] text-champagne">,{frac}</span>
       </p>
       <p className="mt-3 text-sm text-offwhite/50">
-        por mês · crédito de <span className="tabular text-offwhite/80">R$ {formatReais(outcome.creditReais)}</span>
+        por mês, em {outcome.termMonths} meses, para crédito de{' '}
+        <span className="tabular text-offwhite/80">R$ {formatReais(outcome.creditReais)}</span>
       </p>
 
       <p className="mt-6 max-w-md border-l border-copper/60 pl-4 text-[0.78rem] leading-relaxed text-offwhite/50">
@@ -108,7 +106,7 @@ function NoticeResult({
 
   return (
     <div role="status">
-      <p className="label text-copper">Parcela estimada</p>
+      <p className="label text-champagne">Parcela estimada</p>
       <p className="mt-5 font-display text-[1.6rem] font-semibold leading-tight tracking-[-0.025em] text-offwhite md:text-[2rem]">
         {title}
       </p>

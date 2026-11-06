@@ -4,7 +4,7 @@ import { gsap } from '../motion/gsap';
 import { useMotion } from '../motion/useMotion';
 import { ButtonLink } from './ui/Button';
 import { StockImage } from './ui/StockImage';
-import { Label, Lines } from './ui/Type';
+import { Lines } from './ui/Type';
 
 export function FinalCTA() {
   const root = useRef<HTMLElement>(null);
@@ -37,15 +37,14 @@ export function FinalCTA() {
         />
 
         <div className="relative z-[2] mx-auto w-full max-w-[90rem] px-5 pb-16 pt-40 md:px-10 md:pb-24">
-          <Label>Comece agora</Label>
           <h2
             id="cta-final-title"
             data-reveal="lines"
-            className="display mt-6 max-w-5xl text-[clamp(2.6rem,11vw,3.8rem)] text-offwhite md:text-[clamp(4rem,8vw,8rem)]"
+            className="display max-w-6xl text-[clamp(2.1rem,9vw,3.2rem)] text-offwhite md:text-[clamp(3.4rem,6.4vw,6.6rem)]"
           >
             <Lines
-              lines={['Seu próximo passo', 'pode começar', <span key="a" className="text-champagne">agora.</span>]}
-              lineClassName={(i) => (i === 1 ? 'md:pl-[12%]' : i === 2 ? 'pl-[30%] md:pl-[44%]' : '')}
+              lines={['Seu próximo', 'passo pode', 'começar agora.']}
+              lineClassName={(i) => (i === 1 ? 'pl-[8%] md:pl-[12%]' : i === 2 ? 'pl-[4%] md:pl-[30%]' : '')}
             />
           </h2>
           <div className="mt-10 grid grid-cols-1 gap-6 border-t border-offwhite/20 pt-6 md:mt-14 md:grid-cols-12 md:items-end md:gap-10 md:pt-8">

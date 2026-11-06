@@ -27,35 +27,10 @@ export function Words({ text, highlight = [] }: { text: string; highlight?: stri
     <>
       {words.map((w, i) => (
         <Fragment key={i}>
-          <span className={cn('word', highlight.includes(w.replace(/[.,—]/g, '')) && 'text-champagne')}>{w}</span>
+          <span className={cn('word', highlight.includes(w.replace(/[.,;:!?]/g, '')) && 'text-champagne')}>{w}</span>
           {i < words.length - 1 && ' '}
         </Fragment>
       ))}
     </>
-  );
-}
-
-/** Rótulo editorial em caixa alta: "02 / Simulação". */
-export function Label({
-  index,
-  children,
-  tone = 'dark',
-  className,
-}: {
-  index?: string;
-  children: ReactNode;
-  tone?: 'dark' | 'light';
-  className?: string;
-}) {
-  return (
-    <p className={cn('label flex items-center gap-3', tone === 'light' ? 'text-charcoal/55' : 'text-offwhite/50', className)}>
-      {index && (
-        <>
-          <span className={cn('tabular', tone === 'light' ? 'text-wood' : 'text-copper')}>{index}</span>
-          <span aria-hidden="true" className="h-px w-6 bg-current opacity-40" />
-        </>
-      )}
-      <span>{children}</span>
-    </p>
   );
 }

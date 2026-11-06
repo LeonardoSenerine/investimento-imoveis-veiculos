@@ -37,8 +37,7 @@ export const PrivacyNotice = forwardRef<HTMLDialogElement>(function PrivacyNotic
       <div className="flex max-h-[88svh] flex-col">
         <header className="flex items-start justify-between gap-6 border-b border-charcoal/10 px-6 py-5 md:px-8">
           <div>
-            <p className="label text-wood">Privacidade</p>
-            <h2 id="privacy-title" className="mt-2 font-display text-2xl font-semibold tracking-[-0.02em]">
+            <h2 id="privacy-title" className="font-display text-2xl font-semibold tracking-[-0.02em]">
               Aviso de privacidade
             </h2>
           </div>

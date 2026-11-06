@@ -105,8 +105,9 @@ Em desenvolvimento, `window.__gsap` e `window.__ScrollTrigger` ficam expostos pa
 ## Direção de arte
 
 - Paleta: carvão `#151515`, grafite `#292725`, cobre `#B87943`, champagne `#D9A66F`, off-white `#F3F0EA`, madeira `#806047` (tokens em `src/index.css`).
-- Tipografia: Sora (títulos) e Manrope (texto, números, formulários).
+- Tipografia: Archivo, uma família com largura variável. Títulos na versão expandida (118%), texto corrido na largura normal. Contraste de largura em vez de duas fontes.
 - Textos pequenos sobre off-white usam madeira (contraste AA); o cobre fica para elementos grandes e detalhes.
 - Fotos: Unsplash (licença permite uso comercial), selecionadas por luz quente/noturna.
-- Cantos vivos (2px) e fios finos no lugar de cards arredondados; numerais como elementos gráficos.
+- Cantos vivos (2px) e fios finos no lugar de cards arredondados. Numeração só onde há sequência real (as etapas).
+- Sem rótulos em caixa alta acima dos títulos, sem palavra destacada em cor nos títulos e sem travessões no texto.
 - Botão arquitetônico: rótulo + célula de seta separada por fio; no hover, lâmina de cor varre da esquerda e a seta é substituída.
