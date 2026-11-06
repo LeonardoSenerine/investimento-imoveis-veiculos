@@ -44,7 +44,7 @@ export function FAQ() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => track('whatsapp_clicked', { location: 'faq' })}
-              className="group mt-8 inline-block text-charcoal"
+              className="group mt-6 inline-flex min-h-11 items-center text-charcoal"
             >
               <span className="link-draw pb-0.5 font-semibold">Perguntar pelo WhatsApp</span>
             </a>

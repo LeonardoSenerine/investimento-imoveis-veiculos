@@ -21,14 +21,17 @@ export function StockImage({
 }: Props) {
   return (
     <img
-      src={imageUrl(image, widths[Math.min(1, widths.length - 1)], quality)}
-      srcSet={imageSrcSet(image, widths, quality)}
-      sizes={sizes}
-      alt={image.alt}
+      // IMPORTANTE: `loading` e `decoding` precisam vir ANTES de `src`/`srcSet`.
+      // O React aplica os atributos na ordem escrita; se o `src` chegar
+      // primeiro, o navegador inicia o download antes de saber que é lazy.
       loading={priority ? 'eager' : 'lazy'}
       decoding={priority ? 'sync' : 'async'}
       // atributo em minúsculas para compatibilidade com React 18
-      {...({ fetchpriority: priority ? 'high' : 'auto' } as Record<string, string>)}
+      {...({ fetchpriority: priority ? 'high' : 'low' } as Record<string, string>)}
+      sizes={sizes}
+      srcSet={imageSrcSet(image, widths, quality)}
+      src={imageUrl(image, widths[Math.min(1, widths.length - 1)], quality)}
+      alt={image.alt}
       style={{ objectPosition: image.focus, ...style }}
       {...props}
     />

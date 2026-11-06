@@ -32,6 +32,7 @@ function LineField({
   label,
   error,
   inputRef,
+  className,
   ...props
 }: { label: string; error?: string | null; inputRef: Ref<HTMLInputElement> } & InputHTMLAttributes<HTMLInputElement>) {
   const id = props.id!;
@@ -45,8 +46,11 @@ function LineField({
           ref={inputRef}
           aria-invalid={!!error || undefined}
           aria-describedby={error ? `${id}-error` : undefined}
-          className="peer h-14 w-full bg-transparent text-[1.15rem] font-semibold text-charcoal outline-none placeholder:font-medium placeholder:text-charcoal/30 md:text-xl"
           {...props}
+          className={cn(
+            'peer h-14 w-full bg-transparent text-[1.15rem] font-semibold text-charcoal outline-none placeholder:font-medium placeholder:text-charcoal/30 md:text-xl',
+            className,
+          )}
         />
         <span aria-hidden="true" className={cn('absolute inset-x-0 bottom-0 h-px', error ? 'bg-alert-dark' : 'bg-charcoal/20')} />
         <span
@@ -210,7 +214,7 @@ export function LeadCaptureForm({ snapshot }: Props) {
                   setAnswers(emptyAnswers());
                 }
               }}
-              className="link-draw self-start py-2 text-sm font-semibold text-charcoal/65 hover:text-charcoal sm:self-auto"
+              className="link-draw inline-flex min-h-11 items-center self-start text-sm font-semibold text-charcoal/65 hover:text-charcoal sm:self-auto"
             >
               {demo ? 'Voltar ao formulário' : 'Enviar outra simulação'}
             </button>
@@ -340,7 +344,7 @@ export function LeadCaptureForm({ snapshot }: Props) {
           <button
             type="button"
             onClick={openPrivacy}
-            className="font-semibold text-wood underline decoration-wood/40 underline-offset-2 hover:decoration-wood"
+            className="inline-flex min-h-11 items-center align-middle font-semibold text-wood underline decoration-wood/40 underline-offset-2 hover:decoration-wood"
           >
             Aviso de privacidade
           </button>
@@ -348,7 +352,7 @@ export function LeadCaptureForm({ snapshot }: Props) {
         <button
           type="button"
           onClick={() => setStep('qualify')}
-          className="link-draw mt-6 self-start py-1 text-sm font-semibold text-charcoal/60 hover:text-charcoal"
+          className="link-draw mt-4 inline-flex min-h-11 items-center self-start text-sm font-semibold text-charcoal/60 hover:text-charcoal"
         >
           Voltar às perguntas
         </button>

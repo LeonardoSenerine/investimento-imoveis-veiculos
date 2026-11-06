@@ -86,7 +86,7 @@ export function HowItWorks() {
                 key={s.title}
                 data-step
                 className={cn(
-                  'group/step relative py-10 md:py-14',
+                  'group/step relative py-8 md:py-14',
                   i > 0 && 'border-t border-offwhite/[0.07]',
                 )}
               >
@@ -96,7 +96,7 @@ export function HowItWorks() {
                 />
                 <span
                   aria-hidden="true"
-                  className="display numeral-outline block text-[4.5rem] leading-none transition-[color,-webkit-text-stroke-color] duration-700 group-[.is-active]/step:text-champagne md:text-[7.5rem]"
+                  className="display numeral-outline block text-[3.5rem] leading-none transition-[color,-webkit-text-stroke-color] duration-700 group-[.is-active]/step:text-champagne md:text-[7.5rem]"
                 >
                   {String(i + 1).padStart(2, '0')}
                 </span>

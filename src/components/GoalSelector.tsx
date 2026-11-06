@@ -46,7 +46,7 @@ export function GoalSelector({ onSelect }: Props) {
   const { imovel, automovel, moto } = PLANS;
 
   return (
-    <section id="objetivo" aria-labelledby="objetivo-title" className="relative bg-charcoal pb-28 pt-24 md:pb-44 md:pt-40">
+    <section id="objetivo" aria-labelledby="objetivo-title" className="relative bg-charcoal pb-20 pt-20 md:pb-44 md:pt-40">
       <div className="mx-auto max-w-[90rem] px-5 md:px-10">
         {/* Manifesto: as palavras acendem no ritmo da leitura */}
         <div className="grid grid-cols-1 md:grid-cols-12">
@@ -62,7 +62,7 @@ export function GoalSelector({ onSelect }: Props) {
         </div>
 
         {/* Capítulo Imóveis: foto larga à esquerda, palavra cruzando a borda inferior */}
-        <article className="group relative mt-24 grid grid-cols-1 md:mt-40 md:grid-cols-12 md:gap-x-10">
+        <article className="group relative mt-14 grid grid-cols-1 md:mt-40 md:grid-cols-12 md:gap-x-10">
           <div className="relative md:col-span-8">
             <Photo image={IMAGES.property} sizes="(min-width: 768px) 62vw, 100vw" className="aspect-[4/5] md:aspect-[16/11]">
               <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-charcoal/75 via-transparent via-45% to-charcoal/25" />
@@ -109,7 +109,7 @@ export function GoalSelector({ onSelect }: Props) {
         </article>
 
         {/* Capítulo Veículos: espelhado, palavra cruzando a borda superior */}
-        <article className="group relative mt-32 grid grid-cols-1 md:mt-52 md:grid-cols-12 md:gap-x-10">
+        <article className="group relative mt-24 grid grid-cols-1 md:mt-52 md:grid-cols-12 md:gap-x-10">
           <div className="relative md:order-2 md:col-span-6 md:col-start-7 lg:col-span-5 lg:col-start-7">
             <span
               aria-hidden="true"

@@ -109,7 +109,7 @@ export function CreditInput({ label, value, range, onChange, invalid, suffix }: 
             );
           })}
         </div>
-        <div className="tabular mt-2 flex justify-between text-[0.7rem] font-medium text-offwhite/40">
+        <div className="tabular mt-2 flex justify-between text-[0.78rem] font-medium text-offwhite/50">
           <span>{compact(range.min)}</span>
           <span>{compact(range.max)}</span>
         </div>

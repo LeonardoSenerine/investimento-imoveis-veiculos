@@ -56,7 +56,7 @@ export function Header() {
       )}
     >
       <div className="mx-auto flex h-16 max-w-[90rem] items-center justify-between gap-6 px-5 md:h-20 md:px-10">
-        <a href="#topo" className="flex items-baseline gap-3" aria-label="Voltar ao início">
+        <a href="#topo" className="flex min-h-11 items-center gap-3" aria-label="Voltar ao início">
           <span className="font-display text-[0.98rem] font-semibold tracking-[-0.02em] text-offwhite">
             {SITE.descriptor}
           </span>
@@ -94,7 +94,7 @@ export function Header() {
           </ul>
         </nav>
 
-        <ButtonLink href="#simulador" variant={scrolled ? 'primary' : 'outline'} size="sm" icon={false}>
+        <ButtonLink href="#simulador" variant={scrolled ? 'primary' : 'outline'} size="sm" icon={false} className="max-md:min-h-11">
           Simular
         </ButtonLink>
       </div>

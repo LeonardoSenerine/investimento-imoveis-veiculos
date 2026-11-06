@@ -1,6 +1,7 @@
 import { MessageCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useScrollPast } from '../hooks/useScrollPast';
+import { useTypingFocus } from '../hooks/useTypingFocus';
 import { cn } from '../lib/cn';
 import { track } from '../lib/tracking';
 import { whatsappUrl } from '../lib/whatsapp';
@@ -35,13 +36,15 @@ function useConversionAreaVisible() {
 export function WhatsAppButton() {
   const pastHero = useScrollPast(0.85);
   const conversionVisible = useConversionAreaVisible();
-  const showMobileCta = pastHero && !conversionVisible;
+  const typing = useTypingFocus();
+  const showMobileCta = pastHero && !conversionVisible && !typing;
+  const showWhatsApp = pastHero && !typing;
 
   return (
     <>
       <div
         className={cn(
-          'fixed bottom-3 left-3 right-[4.75rem] z-30 transition-[transform,opacity] duration-700 ease-[var(--ease-expo)] md:hidden',
+          'fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] left-3 right-[4.75rem] z-30 transition-[transform,opacity] duration-700 ease-[var(--ease-expo)] md:hidden',
           showMobileCta ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-[130%] opacity-0',
         )}
         aria-hidden={!showMobileCta}
@@ -53,7 +56,7 @@ export function WhatsAppButton() {
           tabIndex={showMobileCta ? 0 : -1}
           className="shadow-[0_18px_40px_-12px_rgb(0_0_0/0.7)]"
         >
-          Fazer minha simulação
+          Ver quanto cabe no meu mês
         </ButtonLink>
       </div>
 
@@ -63,10 +66,10 @@ export function WhatsAppButton() {
         rel="noopener noreferrer"
         aria-label="Conversar pelo WhatsApp"
         onClick={() => track('whatsapp_clicked', { location: 'floating_button' })}
-        tabIndex={pastHero ? 0 : -1}
+        tabIndex={showWhatsApp ? 0 : -1}
         className={cn(
-          'group fixed bottom-3 right-3 z-30 grid size-12 place-items-center rounded-full bg-graphite text-champagne shadow-[inset_0_0_0_1px_rgb(217_166_111/0.35),0_18px_40px_-12px_rgb(0_0_0/0.7)] transition-[transform,opacity,background-color] duration-700 ease-[var(--ease-expo)] hover:bg-charcoal md:bottom-8 md:right-8 md:size-14',
-          pastHero ? 'scale-100 opacity-100' : 'pointer-events-none scale-75 opacity-0',
+          'group fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] right-3 z-30 grid size-12 place-items-center rounded-full bg-graphite text-champagne shadow-[inset_0_0_0_1px_rgb(217_166_111/0.35),0_18px_40px_-12px_rgb(0_0_0/0.7)] transition-[transform,opacity,background-color] duration-700 ease-[var(--ease-expo)] hover:bg-charcoal md:bottom-8 md:right-8 md:size-14',
+          showWhatsApp ? 'scale-100 opacity-100' : 'pointer-events-none scale-75 opacity-0',
         )}
       >
         <MessageCircle className="size-5 transition-transform duration-500 group-hover:-rotate-12 md:size-6" strokeWidth={1.5} />
