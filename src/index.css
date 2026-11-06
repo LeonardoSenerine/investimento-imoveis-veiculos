@@ -1,0 +1,219 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-charcoal: #151515;
+  --color-charcoal-soft: #1b1a19;
+  --color-graphite: #292725;
+  --color-graphite-light: #34312e;
+  --color-copper: #b87943;
+  --color-champagne: #d9a66f;
+  --color-champagne-light: #e6bd8d;
+  --color-offwhite: #f3f0ea;
+  --color-paper: #faf8f4;
+  --color-wood: #806047;
+  --color-wood-dark: #5e4532;
+  --color-alert: #e59b85;
+  --color-alert-dark: #a4452c;
+
+  --font-display: 'Sora', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+
+  --ease-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-inout: cubic-bezier(0.87, 0, 0.13, 1);
+
+  --animate-tick: tick 0.4s var(--ease-expo);
+  --animate-reveal-panel: reveal-panel 0.9s var(--ease-expo) both;
+  --animate-draw: draw 0.9s 0.15s var(--ease-expo) both;
+  --animate-scroll-cue: scroll-cue 2.4s var(--ease-inout) infinite;
+
+  @keyframes tick {
+    from { transform: translateY(0.18em); opacity: 0.4; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes reveal-panel {
+    from { clip-path: inset(0 0 100% 0); transform: translateY(24px); }
+    to { clip-path: inset(0 0 0 0); transform: translateY(0); }
+  }
+  @keyframes draw {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes scroll-cue {
+    0% { transform: scaleY(0); transform-origin: top; }
+    45% { transform: scaleY(1); transform-origin: top; }
+    55% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 4.5rem;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    background: var(--color-charcoal);
+    color: var(--color-offwhite);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--color-champagne);
+    color: var(--color-charcoal);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-champagne);
+    outline-offset: 3px;
+  }
+  .on-light :focus-visible {
+    outline-color: var(--color-wood);
+  }
+}
+
+@layer components {
+  /* Rótulo editorial pequeno, caixa alta, espaçado */
+  .label {
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    line-height: 1.4;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  /* Display: títulos de grande escala */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.045em;
+    line-height: 0.98;
+  }
+
+  /* Máscara de linha para "line reveal" */
+  .line-mask {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.1em;
+    margin-bottom: -0.1em;
+  }
+  .line-inner {
+    display: block;
+  }
+
+  /* Numeral contornado, usado como elemento gráfico */
+  .numeral-outline {
+    color: transparent;
+    -webkit-text-stroke: 1px rgb(243 240 234 / 0.22);
+  }
+
+  /* Textura de grão sutil para superfícies escuras */
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.06;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Sublinhado que se desenha no hover */
+  .link-draw {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.6s var(--ease-expo);
+  }
+  .link-draw:hover,
+  .group:hover .link-draw {
+    background-size: 100% 1px;
+  }
+
+  /* Slider de crédito — instrumento de precisão */
+  .range {
+    --pct: 50%;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    height: 48px;
+    background: transparent;
+    cursor: grab;
+    touch-action: pan-y;
+  }
+  .range:active {
+    cursor: grabbing;
+  }
+  .range::-webkit-slider-runnable-track {
+    height: 2px;
+    background: linear-gradient(
+      to right,
+      var(--color-copper) 0%,
+      var(--color-champagne) var(--pct),
+      rgb(243 240 234 / 0.14) var(--pct)
+    );
+  }
+  .range::-moz-range-track {
+    height: 2px;
+    background: rgb(243 240 234 / 0.14);
+  }
+  .range::-moz-range-progress {
+    height: 2px;
+    background: linear-gradient(to right, var(--color-copper), var(--color-champagne));
+  }
+  .range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 30px;
+    height: 30px;
+    margin-top: -14px;
+    border-radius: 999px;
+    background: radial-gradient(circle, var(--color-champagne) 0 3px, var(--color-charcoal) 3.5px);
+    border: 1.5px solid var(--color-champagne);
+    box-shadow: 0 0 0 0 rgb(217 166 111 / 0.25);
+    transition: box-shadow 0.4s var(--ease-expo), transform 0.4s var(--ease-expo);
+  }
+  .range::-moz-range-thumb {
+    width: 27px;
+    height: 27px;
+    border-radius: 999px;
+    background: radial-gradient(circle, var(--color-champagne) 0 3px, var(--color-charcoal) 3.5px);
+    border: 1.5px solid var(--color-champagne);
+  }
+  .range:hover::-webkit-slider-thumb {
+    box-shadow: 0 0 0 8px rgb(217 166 111 / 0.12);
+  }
+  .range:active::-webkit-slider-thumb {
+    transform: scale(1.12);
+    box-shadow: 0 0 0 12px rgb(217 166 111 / 0.16);
+  }
+  .range:focus-visible {
+    outline: none;
+  }
+  .range:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 4px var(--color-charcoal), 0 0 0 6px var(--color-champagne);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
