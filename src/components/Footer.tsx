@@ -44,6 +44,17 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col gap-3 text-xs md:flex-row md:items-center md:justify-between md:pr-20">
           <p>© {new Date().getFullYear()}. Fotografias: Unsplash.</p>
+          <p>
+            Desenvolvido por{' '}
+            <a
+              href="https://www.senerinedev.com.br/pt"
+              target="_blank"
+              rel="noopener"
+              className="link-draw inline-flex min-h-11 items-center font-semibold text-offwhite/80 hover:text-champagne"
+            >
+              senerine.dev
+            </a>
+          </p>
           {pending.length > 0 && (
             <p className="label text-champagne">Modo demonstração: configure {pending.join(' e ')}.</p>
           )}
