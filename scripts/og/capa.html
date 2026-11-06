@@ -1,0 +1,91 @@
+<!doctype html>
+<!--
+  Modelo da capa de link (1200×630). Renderizado pelo scripts/og-image.py
+  com o navegador em modo headless, para usar exatamente a tipografia do site.
+-->
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..700&display=block"
+    />
+    <style>
+      :root {
+        --charcoal: #151515;
+        --graphite: #292725;
+        --copper: #b87943;
+        --champagne: #d9a66f;
+        --offwhite: #f3f0ea;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { width: 1200px; height: 630px; overflow: hidden; background: var(--charcoal); }
+      body { font-family: 'Archivo', sans-serif; color: var(--offwhite); -webkit-font-smoothing: antialiased; }
+
+      .capa { position: relative; width: 1200px; height: 630px; }
+
+      /* Foto à direita, fundindo no carvão */
+      .foto {
+        position: absolute; top: 0; right: 0; width: 700px; height: 630px;
+        background: url('https://images.unsplash.com/photo-1757524492552-d47a66a2b63e?auto=format&fit=crop&w=1600&q=85') 58% 62% / cover;
+      }
+      .foto::after {
+        content: ''; position: absolute; inset: 0;
+        background:
+          linear-gradient(90deg, var(--charcoal) 0%, rgb(21 21 21 / 0.55) 26%, rgb(21 21 21 / 0) 60%),
+          linear-gradient(180deg, rgb(21 21 21 / 0.35) 0%, transparent 30%, transparent 70%, rgb(21 21 21 / 0.55) 100%);
+      }
+
+      .texto { position: absolute; left: 72px; top: 64px; bottom: 58px; width: 680px; display: flex; flex-direction: column; }
+      .marca { font-stretch: 112%; font-weight: 600; font-size: 30px; letter-spacing: -0.02em; }
+      .marca small { display: block; margin-top: 4px; font-stretch: 100%; font-weight: 500; font-size: 18px; letter-spacing: 0; color: rgb(243 240 234 / 0.55); }
+
+      h1 {
+        margin-top: auto; font-stretch: 118%; font-weight: 600; font-size: 82px; line-height: 0.95; white-space: nowrap; letter-spacing: -0.035em;
+      }
+      h1 span { display: block; }
+      h1 .recuo { padding-left: 64px; }
+
+      .apoio { margin-top: 26px; max-width: 470px; font-size: 24px; line-height: 1.35; color: rgb(243 240 234 / 0.72); }
+      .regra { margin-top: 30px; width: 96px; height: 3px; background: linear-gradient(90deg, var(--copper), var(--champagne)); border-radius: 2px; }
+
+      /* Assinatura: o cartão do simulador sobre a foto */
+      .cartao {
+        position: absolute; right: 64px; bottom: 64px; width: 330px; padding: 26px 28px 24px;
+        background: rgb(41 39 37 / 0.92); border-radius: 10px; overflow: hidden;
+        box-shadow: 0 30px 60px -20px rgb(0 0 0 / 0.75);
+      }
+      .cartao::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+        background: linear-gradient(90deg, var(--copper), rgb(217 166 111 / 0.5), transparent);
+      }
+      .cartao .rotulo { font-size: 17px; font-weight: 600; color: var(--champagne); }
+      .cartao .mensal { margin-top: 6px; font-size: 19px; color: rgb(243 240 234 / 0.7); }
+      .cartao .valor {
+        margin-top: 14px; font-stretch: 108%; font-weight: 700; font-size: 58px; line-height: 0.9; letter-spacing: -0.045em;
+        font-variant-numeric: tabular-nums;
+      }
+      .cartao .valor span { font-size: 22px; font-weight: 600; color: rgb(243 240 234 / 0.5); margin-right: 6px; vertical-align: 26px; letter-spacing: 0; }
+      .cartao .prazo { margin-top: 10px; font-size: 16px; color: rgb(243 240 234 / 0.55); }
+    </style>
+  </head>
+  <body>
+    <div class="capa">
+      <div class="foto"></div>
+
+      <div class="texto">
+        <p class="marca">Chave<small>Planejamento de conquistas</small></p>
+        <h1><span>Quanto cabe</span> <span class="recuo">no seu mês?</span></h1>
+        <p class="apoio">Simule o crédito para seu imóvel, carro ou moto. Sem cadastro.</p>
+        <div class="regra"></div>
+      </div>
+
+      <div class="cartao">
+        <p class="rotulo">Exemplo de simulação</p>
+        <p class="mensal">Com R$ 2.800 por mês</p>
+        <p class="valor"><span>R$</span>495.000</p>
+        <p class="prazo">de crédito estimado em 220 meses</p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -25,6 +25,7 @@ npm run build          # gera /dist
 | Revisão jurídica do aviso de privacidade (LGPD) | `src/components/privacy/PrivacyNotice.tsx` | Modelo-base |
 | Banner de consentimento de cookies (se usar Pixel/GTM) | — | Recomendado, não implementado |
 | Hospedar imagens no próprio CDN (opcional) | `src/config/images.ts` | Usa CDN Unsplash otimizado |
+| Domínio público para a capa de link | `VITE_SITE_URL` | Sem ele, a capa não aparece nas redes |
 
 Enquanto a API ou o WhatsApp não estiverem configurados, o rodapé e o formulário mostram o selo **Modo demonstração**.
 
@@ -84,6 +85,17 @@ Use GTM **ou** Pixel direto — não os dois para o mesmo Pixel, para não dupli
 
 Contrato em [docs/api-contract.md](docs/api-contract.md) e tabela sugerida em [docs/schema.sql](docs/schema.sql).
 Nenhum dado pessoal é salvo no navegador.
+
+## Capa de link (WhatsApp, Instagram, Facebook, X)
+
+- Imagem: `public/assets/og/chave-og-v1.jpg` (1200×630, JPG, ~130 KB).
+- Desenho: `scripts/og/capa.html`, com as cores e a tipografia do site. Para gerar de novo:
+  `python scripts/og-image.py` (usa o Chrome em modo headless e o Pillow).
+- Defina `VITE_SITE_URL` com o domínio público: as metatags precisam de URL absoluta.
+  Sem ela, o build avisa e a capa não aparece nas redes.
+- Ao trocar a capa, suba a versão do arquivo (`-v2`, `-v3`) no script e no `index.html`;
+  WhatsApp e Facebook guardam a imagem antiga em cache. Para forçar a atualização no Facebook
+  e no Instagram, use o Sharing Debugger da Meta.
 
 ## Motion
 
