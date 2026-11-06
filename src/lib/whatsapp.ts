@@ -13,18 +13,19 @@ export function whatsappUrl(message: string = SITE.defaultWhatsAppMessage): stri
     : `https://wa.me/?text=${text}`;
 }
 
-export function simulationMessage(snapshot: SimulationSnapshot, name?: string): string {
+export function simulationMessage(snapshot: SimulationSnapshot, name?: string, timeframe?: string | null): string {
   const greeting = name ? `Olá! Meu nome é ${name.trim().split(' ')[0]}.` : 'Olá!';
   return [
     greeting,
-    `Fiz uma simulação de consórcio de ${snapshot.planNoun} no site:`,
-    `Crédito: ${formatCents(snapshot.creditCents)}`,
-    `Prazo de referência: ${snapshot.termMonths} meses`,
-    `Parcela estimada: ${formatCents(snapshot.installmentCents)}`,
-    'Gostaria de conhecer as condições disponíveis.',
+    `Fiz uma simulação no site para planejar ${snapshot.planNoun === 'motocicleta' ? 'minha' : 'meu'} ${snapshot.planNoun}:`,
+    `Posso investir: ${formatCents(snapshot.monthlyBudgetCents)} por mês`,
+    `Crédito estimado: ${formatCents(snapshot.creditCents)}`,
+    `Prazo: ${snapshot.termMonths} meses`,
+    ...(timeframe ? [`Quando pretendo: ${timeframe.toLowerCase()}`] : []),
+    'Gostaria de conhecer as condições.',
   ].join('\n');
 }
 
-export function rangeHelpMessage(planNoun: string, creditLabel: string): string {
-  return `Olá! Tenho interesse em um consórcio de ${planNoun} com crédito de ${creditLabel}. Pode me ajudar com essa simulação?`;
+export function rangeHelpMessage(planNoun: string, monthlyLabel: string): string {
+  return `Olá! Quero planejar ${planNoun === 'motocicleta' ? 'uma' : 'um'} ${planNoun} e posso investir ${monthlyLabel} por mês. Pode me ajudar com essa simulação?`;
 }

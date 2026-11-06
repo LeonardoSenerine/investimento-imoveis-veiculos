@@ -35,8 +35,9 @@ export function Footer() {
             </ul>
           </nav>
           <p className="text-xs leading-relaxed md:col-span-4">
-            Este site é mantido por um profissional de vendas de consórcios e não pertence a uma administradora. Os
-            planos são administrados por administradoras autorizadas pelo Banco Central do Brasil. As simulações são
+            Este site é mantido por um consultor comercial independente e não pertence a uma administradora. Os
+            planos de consórcio apresentados são administrados por administradoras autorizadas pelo Banco Central do
+            Brasil. As simulações são
             ilustrativas e não representam proposta, oferta ou garantia de contemplação.
           </p>
         </div>

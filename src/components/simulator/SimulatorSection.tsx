@@ -7,9 +7,9 @@ import {
   type VehicleKind,
 } from '../../config/simulators';
 import { IMAGES, type StockImage as Img } from '../../config/images';
-import { simulate, type SimulationOutcome } from '../../lib/calculator';
+import { simulateFromMonthly, type MonthlyOutcome } from '../../lib/calculator';
 import { cn } from '../../lib/cn';
-import { centsToDecimalString } from '../../lib/money';
+import { centsToDecimalString, reaisToCents } from '../../lib/money';
 import { scrollToId } from '../../lib/scroll';
 import { track } from '../../lib/tracking';
 import { gsap } from '../../motion/gsap';
@@ -34,10 +34,11 @@ const PLAN_IMAGES: Record<PlanId, Img> = {
   moto: IMAGES.motorcycleWide,
 };
 
+/** Valor mensal inicial de cada objetivo (reproduz os exemplos do cliente). */
 const initialValues = (): Record<PlanId, number | null> => ({
-  imovel: PLANS.imovel.credit.default,
-  automovel: PLANS.automovel.credit.default,
-  moto: PLANS.moto.credit.default,
+  imovel: PLANS.imovel.monthly.default,
+  automovel: PLANS.automovel.monthly.default,
+  moto: PLANS.moto.monthly.default,
 });
 
 export function SimulatorSection({ goal }: Props) {
@@ -45,16 +46,22 @@ export function SimulatorSection({ goal }: Props) {
   const [category, setCategory] = useState<Category>('property');
   const [vehicleKind, setVehicleKind] = useState<VehicleKind>('automovel');
   const [values, setValues] = useState(initialValues);
+  const [terms, setTerms] = useState<Record<PlanId, number>>(() => ({
+    imovel: PLANS.imovel.termMonths,
+    automovel: PLANS.automovel.termMonths,
+    moto: PLANS.moto.termMonths,
+  }));
   const [started, setStarted] = useState(false);
   const [leadOpen, setLeadOpen] = useState(false);
   const lastCompleted = useRef('');
 
   const planId: PlanId = category === 'property' ? 'imovel' : vehicleKind;
   const value = values[planId];
+  const term = terms[planId];
 
   const { outcome, computedAt } = useMemo(
-    () => ({ outcome: simulate(planId, value), computedAt: new Date().toISOString() }),
-    [planId, value],
+    () => ({ outcome: simulateFromMonthly(planId, value, term), computedAt: new Date().toISOString() }),
+    [planId, value, term],
   );
 
   const snapshot: SimulationSnapshot | null = useMemo(
@@ -65,6 +72,7 @@ export function SimulatorSection({ goal }: Props) {
             planLabel: outcome.plan.label,
             planNoun: outcome.plan.noun,
             category: outcome.plan.category,
+            monthlyBudgetCents: reaisToCents(outcome.monthlyReais ?? 0),
             creditCents: outcome.creditCents,
             installmentCents: outcome.installmentCents,
             termMonths: outcome.termMonths,
@@ -90,14 +98,15 @@ export function SimulatorSection({ goal }: Props) {
     [started],
   );
 
-  const fireCompleted = useCallback((o: SimulationOutcome) => {
+  const fireCompleted = useCallback((o: MonthlyOutcome) => {
     if (o.status !== 'ok') return;
-    const key = `${o.plan.id}:${o.creditReais}`;
+    const key = `${o.plan.id}:${o.monthlyReais}:${o.termMonths}`;
     if (lastCompleted.current === key) return;
     lastCompleted.current = key;
     track('simulation_completed', {
       plan: o.plan.id,
       category: o.plan.category,
+      monthly_budget: o.monthlyReais ?? 0,
       credit_amount: o.creditReais,
       term_months: o.termMonths,
       estimated_installment: Number(centsToDecimalString(o.installmentCents)),
@@ -117,6 +126,11 @@ export function SimulatorSection({ goal }: Props) {
   const setValue = (v: number | null) => {
     markStarted(planId);
     setValues((prev) => ({ ...prev, [planId]: v }));
+  };
+
+  const setTerm = (months: number) => {
+    markStarted(planId);
+    setTerms((prev) => ({ ...prev, [planId]: months }));
   };
 
   const selectPlan = (id: PlanId) => {
@@ -139,7 +153,7 @@ export function SimulatorSection({ goal }: Props) {
     markStarted(planId);
     fireCompleted(outcome);
     setLeadOpen(true);
-    requestAnimationFrame(() => scrollToId('cadastro', 'input[name="name"]'));
+    requestAnimationFrame(() => scrollToId('cadastro', 'input[type="radio"]'));
   };
 
   // Transição de seção: a folha off-white se abre lateralmente ao entrar.
@@ -171,12 +185,12 @@ export function SimulatorSection({ goal }: Props) {
                 className="display text-[clamp(2.2rem,9.4vw,3rem)] text-charcoal md:text-[clamp(2.8rem,4.6vw,4.4rem)]"
               >
                 <Lines
-                  lines={['Quanto', 'você quer', 'conquistar?']}
+                  lines={['Quanto cabe', 'no seu mês?']}
                   lineClassName={(i) => (i === 1 ? 'pl-[12%]' : '')}
                 />
               </h2>
               <p className="mt-6 max-w-sm leading-relaxed text-charcoal/65">
-                Escolha o plano, ajuste o crédito e acompanhe a parcela estimada mudar na hora.
+                Escolha o objetivo, informe quanto pode investir por mês e veja na hora o crédito que dá para planejar.
               </p>
 
               <div className="mt-10">
@@ -216,15 +230,28 @@ export function SimulatorSection({ goal }: Props) {
                 <div className="mb-8 flex items-baseline justify-between gap-4">
                   <p className="font-display text-lg font-semibold tracking-[-0.02em]">{PLANS[planId].label}</p>
                   <p className="tabular text-sm text-offwhite/50">
-                    <span className="hidden sm:inline">Prazo de referência: </span>
-                    {PLANS[planId].termMonths} meses
+                    <span className="hidden sm:inline">Prazo escolhido: </span>
+                    {term} meses
                   </p>
                 </div>
                 <div key={planId} className="animate-tick">
                   {category === 'property' ? (
-                    <PropertySimulator value={values.imovel} onChange={setValue} invalid={invalid} />
+                    <PropertySimulator
+                      value={values.imovel}
+                      onChange={setValue}
+                      term={term}
+                      onTermChange={setTerm}
+                      invalid={invalid}
+                    />
                   ) : (
-                    <VehicleSimulator kind={vehicleKind} value={value} onChange={setValue} invalid={invalid} />
+                    <VehicleSimulator
+                      kind={vehicleKind}
+                      value={value}
+                      onChange={setValue}
+                      term={term}
+                      onTermChange={setTerm}
+                      invalid={invalid}
+                    />
                   )}
                 </div>
               </div>

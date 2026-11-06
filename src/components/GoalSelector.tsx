@@ -56,7 +56,7 @@ export function GoalSelector({ onSelect }: Props) {
             className="font-display text-[clamp(1.45rem,3.3vw,3rem)] font-medium leading-[1.16] tracking-[-0.025em] text-offwhite md:col-span-10 md:col-start-3"
           >
             <Words
-              text="Consórcio é uma compra planejada. Você escolhe o objetivo, entende as condições e decide no seu tempo, com orientação em cada etapa." 
+              text="Comprar com planejamento muda tudo. Você escolhe o objetivo, descobre quanto cabe no seu mês e decide no seu tempo, com orientação em cada etapa." 
             />
           </h2>
         </div>
@@ -84,7 +84,7 @@ export function GoalSelector({ onSelect }: Props) {
             </p>
             <Facts
               rows={[
-                ['Prazo de referência', `${imovel.termMonths} meses`],
+                ['Prazos', `${Math.min(...imovel.termOptions)} a ${Math.max(...imovel.termOptions)} meses`],
                 ['Faixa no simulador', `${formatReaisShort(imovel.credit.min)} a ${formatReaisShort(imovel.credit.max)}`],
               ]}
             />
@@ -95,7 +95,7 @@ export function GoalSelector({ onSelect }: Props) {
               className="z-[6] mt-8"
               onClick={() => onSelect('property')}
             >
-              Simular consórcio imobiliário
+              Planejar meu imóvel
             </Button>
           </div>
           {/* Área clicável do capítulo inteiro (o botão acima continua sendo o alvo acessível) */}
@@ -162,7 +162,7 @@ export function GoalSelector({ onSelect }: Props) {
                         {plan.label}
                       </span>
                       <span className="tabular mt-0.5 block text-sm text-offwhite/50">
-                        {range}, prazo de {plan.termMonths} meses
+                        {range}, prazos de {Math.min(...plan.termOptions)} a {Math.max(...plan.termOptions)} meses
                       </span>
                     </span>
                     <span className="link-draw text-sm font-semibold text-offwhite/60 transition-colors group-hover/row:text-champagne">
@@ -174,7 +174,7 @@ export function GoalSelector({ onSelect }: Props) {
             </ul>
 
             <Button variant="outline" icon={false} fullWidth className="mt-8" onClick={() => onSelect('vehicle')}>
-              Simular consórcio de veículos
+              Planejar meu veículo
             </Button>
           </div>
         </article>

@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { IMAGES } from '../config/images';
 import { gsap } from '../motion/gsap';
 import { useMotion } from '../motion/useMotion';
-import { ButtonLink } from './ui/Button';
+import { ButtonLink, ButtonNote } from './ui/Button';
 import { StockImage } from './ui/StockImage';
 import { Lines } from './ui/Type';
 
@@ -52,9 +52,10 @@ export function FinalCTA() {
               Faça uma simulação e conheça as possibilidades para seu próximo objetivo.
             </p>
             <div className="md:col-span-4 md:col-start-9">
-              <ButtonLink href="#simulador" fullWidth caption="Resultado na hora">
+              <ButtonLink href="#simulador" fullWidth>
                 Começar minha simulação
               </ButtonLink>
+              <ButtonNote className="md:text-left">Resultado na hora, sem cadastro</ButtonNote>
             </div>
           </div>
         </div>

@@ -12,11 +12,20 @@
     "plan_id": "automovel",
     "plan_label": "Automóvel",
     "category": "vehicle",
+    "monthly_budget": "1300.00",
     "credit_amount": "100000.00",
     "term_months": 90,
     "estimated_installment": "1291.11",
     "simulated_at": "2026-11-06T18:20:11.512Z",
     "rules_status": "preliminar"
+  },
+  "qualification": {
+    "timeframe": "asap",
+    "savings": "yes",
+    "purchase_type": "first",
+    "best_time": "evening",
+    "score": 5,
+    "temperature": "quente"
   },
   "attribution": {
     "utm_source": "meta",
@@ -43,6 +52,22 @@
 ```
 
 Valores monetários chegam como **string decimal** (nunca float). Grave como `numeric(14,2)`.
+
+- `monthly_budget`: quanto a pessoa disse que pode investir por mês (entrada principal do simulador).
+- `credit_amount`: crédito estimado pela fórmula inversa, arredondado para baixo.
+- `estimated_installment`: parcela de referência desse crédito (sempre ≤ `monthly_budget`).
+
+### Qualificação
+
+| Campo | Valores |
+| --- | --- |
+| `timeframe` | `asap` (o quanto antes), `within_1y` (até 1 ano), `planning` (sem pressa) |
+| `savings` | `yes`, `no`, `talk` (prefere conversar) |
+| `purchase_type` | `first` (primeira aquisição), `upgrade` (troca), `investment` |
+| `best_time` | `morning`, `afternoon`, `evening` |
+| `temperature` | `quente` (score ≥ 4), `morno` (2 a 3), `frio` (0 a 1) |
+
+Os pesos ficam em `src/config/qualification.ts`. Recalcule o score no servidor se for usá-lo para distribuição de leads.
 
 ## Respostas
 

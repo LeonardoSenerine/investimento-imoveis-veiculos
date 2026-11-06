@@ -4,12 +4,12 @@ import { PLANS } from '../config/simulators';
 import { formatReaisShort } from '../lib/money';
 import { gsap } from '../motion/gsap';
 import { useMotion } from '../motion/useMotion';
-import { ButtonLink } from './ui/Button';
+import { ButtonLink, ButtonNote } from './ui/Button';
 import { StockImage } from './ui/StockImage';
 import { Lines } from './ui/Type';
 
 const INDEX = [
-  { label: 'Imóveis', meta: `${PLANS.imovel.termMonths} meses` },
+  { label: 'Imóveis', meta: `até ${Math.max(...PLANS.imovel.termOptions)} meses` },
   { label: 'Automóveis', meta: `desde ${formatReaisShort(PLANS.automovel.credit.min)}` },
   { label: 'Motocicletas', meta: `até ${formatReaisShort(PLANS.moto.credit.max)}` },
 ];
@@ -86,7 +86,7 @@ export function Hero() {
         {/* Linha superior: o que é a página e as categorias atendidas */}
         <div className="flex items-start justify-between gap-8">
           <p data-hero-fade className="max-w-[16rem] text-sm leading-snug text-offwhite/70">
-            Consórcio de imóveis, automóveis e motocicletas
+            Planejamento para conquistar imóvel, carro ou moto
           </p>
           <ol data-hero-fade className="hidden min-w-[16rem] bg-charcoal/55 px-5 py-3 backdrop-blur-md md:block" aria-label="Categorias">
             {INDEX.map((item) => (
@@ -123,19 +123,20 @@ export function Hero() {
           <span data-hero-rule aria-hidden="true" className="absolute inset-x-0 top-0 h-px origin-left bg-offwhite/20" />
           <div className="grid grid-cols-1 gap-5 pt-5 md:grid-cols-12 md:items-end md:gap-10 md:pt-8">
             <p data-hero-fade className="max-w-md text-[0.98rem] leading-relaxed text-offwhite/72 md:col-span-6 md:text-lg xl:col-span-5">
-              Descubra possibilidades de consórcio para conquistar seu imóvel ou veículo, com planejamento e
-              orientação em cada etapa.
+              Descubra quanto da sua casa ou do seu carro cabe no seu mês, com planejamento e orientação em cada
+              etapa.
             </p>
             <div data-hero-fade className="hidden xl:col-span-3 xl:block">
               <p className="label text-champagne">Resultado na hora</p>
               <p className="mt-2 text-sm leading-relaxed text-offwhite/55">
-                Simule sem cadastro e veja a parcela estimada enquanto ajusta o valor.
+                Informe quanto pode investir por mês e veja o crédito que dá para planejar, sem cadastro.
               </p>
             </div>
             <div data-hero-fade className="md:col-span-5 md:col-start-8 xl:col-span-4 xl:col-start-auto">
-              <ButtonLink href="#simulador" fullWidth caption="Sem cadastro para simular">
-                Fazer minha simulação
+              <ButtonLink href="#simulador" fullWidth>
+                Ver quanto cabe no meu mês
               </ButtonLink>
+              <ButtonNote className="md:text-left">Sem cadastro para simular</ButtonNote>
             </div>
           </div>
         </div>

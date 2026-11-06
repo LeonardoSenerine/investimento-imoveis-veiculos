@@ -64,7 +64,11 @@ export function formatReaisShort(reais: number): string {
     const value = reais / 1_000_000;
     return `R$ ${value.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mi`;
   }
-  if (reais >= 1_000) return `R$ ${formatReais(reais / 1_000)} mil`;
+  if (reais >= 1_000) {
+    // 20.700 → "20,7 mil" (uma casa decimal, sem arredondar para cima)
+    const value = Math.floor(reais / 100) / 10;
+    return `R$ ${value.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mil`;
+  }
   return `R$ ${formatReais(reais)}`;
 }
 

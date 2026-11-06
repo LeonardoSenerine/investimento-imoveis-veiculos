@@ -26,15 +26,35 @@ export interface CreditRange {
   quickPicks: number[];
 }
 
+/**
+ * Entrada principal do simulador: quanto a pessoa pode investir por mês.
+ * Os limites mínimo e máximo NÃO ficam aqui: são derivados da faixa de
+ * crédito pela própria fórmula (ver `monthlyRange` em lib/calculator.ts),
+ * para nunca ficarem inconsistentes quando a regra mudar.
+ */
+export interface MonthlyInput {
+  step: number;
+  default: number;
+  quickPicks: number[];
+}
+
 export interface PlanConfig {
   id: PlanId;
   category: Category;
   label: string;
-  /** Rótulo usado em frases: "consórcio de {noun}". */
+  /** Rótulo usado em frases: "planejar seu {noun}". */
   noun: string;
   factor: string;
+  /** Prazo padrão (o prazo para o qual o cliente informou o fator). */
   termMonths: number;
+  /**
+   * Prazos que a pessoa pode escolher. ATENÇÃO: o mesmo fator é aplicado a
+   * todos eles (decisão provisória); em planos reais o fator costuma variar
+   * com o prazo e precisa ser validado.
+   */
+  termOptions: number[];
   credit: CreditRange;
+  monthly: MonthlyInput;
   /** Resumo da faixa exibido na interface. */
   rangeSummary: string;
 }
@@ -47,6 +67,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     noun: 'imóvel',
     factor: '1.242',
     termMonths: 220,
+    termOptions: [120, 150, 180, 200, 220, 240],
     credit: {
       min: 100_000,
       max: 2_000_000,
@@ -54,7 +75,8 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       default: 500_000,
       quickPicks: [300_000, 500_000, 800_000, 1_200_000],
     },
-    rangeSummary: 'Prazo de referência de 220 meses',
+    monthly: { step: 50, default: 2_800, quickPicks: [1_500, 2_800, 4_500, 7_000] },
+    rangeSummary: 'Prazos de 120 a 240 meses',
   },
   automovel: {
     id: 'automovel',
@@ -63,6 +85,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     noun: 'automóvel',
     factor: '1.162',
     termMonths: 90,
+    termOptions: [36, 48, 60, 72, 80, 90, 100],
     credit: {
       min: 35_000,
       max: 400_000,
@@ -70,6 +93,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       default: 100_000,
       quickPicks: [60_000, 100_000, 150_000, 250_000],
     },
+    monthly: { step: 10, default: 1_300, quickPicks: [600, 1_000, 1_300, 2_000] },
     rangeSummary: 'Créditos a partir de R$ 35 mil',
   },
   moto: {
@@ -79,6 +103,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     noun: 'motocicleta',
     factor: '1.282',
     termMonths: 60,
+    termOptions: [24, 36, 48, 60, 72],
     credit: {
       min: 8_000,
       max: 30_000,
@@ -86,6 +111,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       default: 20_000,
       quickPicks: [12_000, 18_000, 22_000, 30_000],
     },
+    monthly: { step: 5, default: 430, quickPicks: [200, 300, 430, 600] },
     rangeSummary: 'Créditos até R$ 30 mil',
   },
 };
@@ -100,6 +126,10 @@ export const UNVALIDATED_VEHICLE_RANGE = {
   message:
     'Para créditos entre R$ 30 mil e R$ 35 mil, a simulação é feita com um especialista. Fale com a gente para conhecer as opções dessa faixa.',
 } as const;
+
+/** Transparência sobre a modalidade, exibida junto ao resultado, antes do cadastro. */
+export const MODALITY_NOTE =
+  'Modalidade: consórcio, sem juros. Há taxa de administração e demais encargos previstos em contrato.';
 
 export const SIMULATION_DISCLAIMER =
   'Simulação ilustrativa. Valores sujeitos à confirmação das condições do plano, composição da parcela e regras da administradora.';

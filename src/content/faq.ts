@@ -6,10 +6,17 @@ export interface FaqItem {
 /** Respostas informativas, sem promessas comerciais. Revisar com a administradora parceira. */
 export const FAQ: FaqItem[] = [
   {
-    q: 'O que é um consórcio?',
+    q: 'Que forma de compra é essa?',
     a: [
-      'É uma modalidade de compra planejada: um grupo de pessoas contribui mensalmente para formar um fundo comum e, ao longo do prazo, os participantes são contemplados com uma carta de crédito para adquirir o bem.',
-      'Os grupos são organizados por administradoras autorizadas e fiscalizadas pelo Banco Central do Brasil, conforme a Lei nº 11.795/2008.',
+      'É um consórcio: uma compra planejada em que um grupo de pessoas contribui mensalmente para formar um fundo comum. Ao longo do prazo, os participantes recebem uma carta de crédito para comprar o bem.',
+      'Diferente de um financiamento, não há cobrança de juros. Há taxa de administração e outros encargos previstos em contrato, apresentados antes de qualquer assinatura.',
+    ],
+  },
+  {
+    q: 'Consórcio é seguro?',
+    a: [
+      'Os grupos são administrados por empresas autorizadas e fiscalizadas pelo Banco Central do Brasil, conforme a Lei nº 11.795/2008. Você pode consultar a autorização da administradora no site do Banco Central.',
+      'Antes de aderir, você recebe o contrato com todas as regras do grupo: prazo, taxas, reajustes e formas de liberação do crédito.',
     ],
   },
   {

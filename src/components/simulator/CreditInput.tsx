@@ -1,25 +1,36 @@
 import { useId, type CSSProperties } from 'react';
-import type { CreditRange } from '../../config/simulators';
 import { cn } from '../../lib/cn';
 import { formatReais, formatReaisShort, parseReaisInput } from '../../lib/money';
+
+export interface MoneyRange {
+  min: number;
+  max: number;
+  step: number;
+  quickPicks: number[];
+}
 
 interface Props {
   label: string;
   value: number | null;
-  range: CreditRange;
+  range: MoneyRange;
   onChange: (value: number | null) => void;
   invalid?: boolean;
+  /** Texto após o valor, ex.: "por mês". */
+  suffix?: string;
 }
+
+/** "R$ 2.800" para valores mensais; "R$ 1,2 mi" para valores grandes. */
+const compact = (v: number) => (v >= 10_000 ? formatReaisShort(v) : `R$ ${formatReais(v)}`);
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 const TICKS = 48;
 
 /**
- * Crédito em destaque: campo monetário + slider sincronizados.
+ * Valor em destaque: campo monetário + slider sincronizados.
  * O campo aceita qualquer valor (a validação acontece no cálculo);
  * o slider acompanha dentro dos limites do plano.
  */
-export function CreditInput({ label, value, range, onChange, invalid }: Props) {
+export function CreditInput({ label, value, range, onChange, invalid, suffix }: Props) {
   const id = useId();
   const sliderValue = clamp(value ?? range.min, range.min, range.max);
   const ratio = (sliderValue - range.min) / (range.max - range.min);
@@ -60,6 +71,11 @@ export function CreditInput({ label, value, range, onChange, invalid }: Props) {
           }}
           className="figure w-full min-w-0 bg-transparent font-sans text-[clamp(2.5rem,10.5vw,4.4rem)] font-bold leading-none tracking-[-0.04em] text-offwhite caret-champagne outline-none placeholder:text-offwhite/20"
         />
+        {suffix && (
+          <span className="shrink-0 whitespace-nowrap text-sm font-medium text-offwhite/45 md:text-base" aria-hidden="true">
+            {suffix}
+          </span>
+        )}
       </div>
 
       {/* Slider com régua milimetrada */}
@@ -94,8 +110,8 @@ export function CreditInput({ label, value, range, onChange, invalid }: Props) {
           })}
         </div>
         <div className="tabular mt-2 flex justify-between text-[0.7rem] font-medium text-offwhite/40">
-          <span>{formatReaisShort(range.min)}</span>
-          <span>{formatReaisShort(range.max)}</span>
+          <span>{compact(range.min)}</span>
+          <span>{compact(range.max)}</span>
         </div>
       </div>
 
@@ -121,7 +137,7 @@ export function CreditInput({ label, value, range, onChange, invalid }: Props) {
                   active ? 'scale-x-100' : 'scale-x-0',
                 )}
               />
-              {formatReaisShort(v).replace('R$ ', '')}
+              {compact(v).replace('R$ ', '')}
             </button>
           );
         })}

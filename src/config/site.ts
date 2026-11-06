@@ -7,9 +7,12 @@ const env = import.meta.env;
 const digits = (value: string | undefined) => (value ?? '').replace(/\D/g, '');
 
 export const SITE = {
-  /** Descritor textual exibido no cabeçalho (não é marca nem logotipo). */
-  descriptor: 'Consórcios',
-  descriptorDetail: 'Imóveis e veículos',
+  /**
+   * Marca pessoal do consultor (proposta: "Chave", o momento de receber a chave
+   * da casa ou do carro). Troque aqui para alterar em todo o site.
+   */
+  descriptor: 'Chave',
+  descriptorDetail: 'Planejamento de conquistas',
   whatsappNumber: digits(env.VITE_WHATSAPP_NUMBER),
   leadApiUrl: (env.VITE_LEAD_API_URL ?? '').trim(),
   gtmId: (env.VITE_GTM_ID ?? '').trim(),
@@ -17,7 +20,7 @@ export const SITE = {
   privacyEmail: (env.VITE_PRIVACY_EMAIL ?? '').trim(),
   privacyNoticeVersion: '2026-11-06',
   defaultWhatsAppMessage:
-    'Olá! Vim pelo site e gostaria de receber informações sobre consórcio.',
+    'Olá! Vim pelo site e quero planejar a compra de um imóvel ou veículo.',
 } as const;
 
 export const isLeadApiConfigured = SITE.leadApiUrl.length > 0;

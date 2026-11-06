@@ -37,10 +37,10 @@ export function FAQ() {
               <Lines lines={['Dúvidas', 'frequentes']} />
             </h2>
             <p className="mt-6 max-w-xs leading-relaxed text-charcoal/60">
-              Como o consórcio funciona, explicado sem promessas.
+              Tudo o que você precisa saber antes de decidir, sem promessas.
             </p>
             <a
-              href={whatsappUrl('Olá! Tenho uma dúvida sobre consórcio.')}
+              href={whatsappUrl('Olá! Vim pelo site e tenho uma dúvida sobre o planejamento.')}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => track('whatsapp_clicked', { location: 'faq' })}

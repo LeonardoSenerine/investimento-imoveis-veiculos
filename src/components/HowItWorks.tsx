@@ -11,12 +11,12 @@ const STEPS = [
     text: 'Imóvel, automóvel ou motocicleta: defina o que você quer planejar.',
   },
   {
-    title: 'Conheça as possibilidades de crédito e prazo',
-    text: 'Simule valores e veja uma estimativa de parcela como referência inicial.',
+    title: 'Descubra quanto cabe no seu mês',
+    text: 'Informe o valor que você pode investir e veja o crédito estimado como referência inicial.',
   },
   {
     title: 'Entenda as condições do plano',
-    text: 'Taxa de administração, fundo de reserva, reajustes e regras de contemplação, explicados antes de qualquer decisão.',
+    text: 'Taxa de administração, reajustes e como o crédito é liberado, explicados antes de qualquer decisão.',
   },
   {
     title: 'Siga com o atendimento especializado',
@@ -61,7 +61,7 @@ export function HowItWorks() {
               />
             </h2>
             <p className="mt-6 max-w-sm leading-relaxed text-offwhite/60">
-              O consórcio é uma compra planejada. Entender cada fase ajuda você a decidir com segurança.
+              Uma compra planejada, sem pressa e sem surpresa. Entender cada fase ajuda você a decidir com segurança.
             </p>
             <div className="mt-10 hidden max-w-xs lg:block">
               <ButtonLink href="#simulador" variant="outline" icon={false} fullWidth>
@@ -110,8 +110,8 @@ export function HowItWorks() {
           </ol>
 
           <p className="ml-7 border-t border-offwhite/[0.07] pt-8 text-sm leading-relaxed text-offwhite/45 md:ml-14">
-            A contemplação acontece por sorteio ou lance, conforme as regras de cada grupo. Não existe data
-            garantida para ser contemplado.
+            O crédito é liberado por sorteio ou lance, conforme as regras de cada grupo. Não existe data garantida
+            para a liberação.
           </p>
         </div>
       </div>

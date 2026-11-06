@@ -1,5 +1,6 @@
 import { MessageCircle } from 'lucide-react';
 import { useEffect, useId, useRef, useState, type FormEvent, type InputHTMLAttributes, type Ref } from 'react';
+import { answerLabel, emptyAnswers, scoreAnswers, type Answers } from '../config/qualification';
 import { isLeadApiConfigured } from '../config/site';
 import { getAttribution } from '../lib/attribution';
 import { cn } from '../lib/cn';
@@ -10,6 +11,7 @@ import { simulationMessage, whatsappUrl } from '../lib/whatsapp';
 import { submitLead } from '../services/leadService';
 import type { SimulationSnapshot } from '../types';
 import { usePrivacy } from './privacy/PrivacyContext';
+import { QualificationStep } from './QualificationStep';
 import { Button, ButtonLink } from './ui/Button';
 
 interface Props {
@@ -101,6 +103,8 @@ export function LeadCaptureForm({ snapshot }: Props) {
   const [honeypot, setHoneypot] = useState('');
   const [touched, setTouched] = useState<Record<Field, boolean>>({ name: false, phone: false });
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
+  const [step, setStep] = useState<'qualify' | 'contact'>('qualify');
+  const [answers, setAnswers] = useState<Answers>(emptyAnswers);
   const nameRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
   const resultHeadingRef = useRef<HTMLHeadingElement>(null);
@@ -112,6 +116,16 @@ export function LeadCaptureForm({ snapshot }: Props) {
     if (status.kind === 'success' || status.kind === 'demo') resultHeadingRef.current?.focus();
   }, [status.kind]);
 
+  const noun = snapshot?.planNoun ?? 'objetivo';
+
+  const goToContact = () => {
+    setStep('contact');
+    requestAnimationFrame(() => {
+      document.getElementById('cadastro')?.scrollIntoView({ block: 'start' });
+      nameRef.current?.focus({ preventScroll: true });
+    });
+  };
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setTouched({ name: true, phone: true });
@@ -120,10 +134,12 @@ export function LeadCaptureForm({ snapshot }: Props) {
     if (!snapshot) return;
 
     setStatus({ kind: 'submitting' });
+    const qualification = scoreAnswers(answers, snapshot.planNoun);
     const result = await submitLead({
       name,
       whatsapp: toE164BR(phone),
       simulation: snapshot,
+      qualification: { answers, ...qualification },
       attribution: getAttribution(),
       honeypot,
     });
@@ -133,8 +149,10 @@ export function LeadCaptureForm({ snapshot }: Props) {
       track('lead_form_submitted', {
         plan: snapshot.planId,
         category: snapshot.category,
+        monthly_budget: Number(snapshot.monthlyBudgetCents / 100n),
         credit_amount: Number(snapshot.creditCents / 100n),
         term_months: snapshot.termMonths,
+        lead_temperature: qualification.temperature,
       });
       setStatus({ kind: 'success', sent: snapshot, name });
     } else if (result.status === 'demo') {
@@ -169,12 +187,12 @@ export function LeadCaptureForm({ snapshot }: Props) {
               : 'Um especialista vai entrar em contato pelo WhatsApp informado para apresentar as condições disponíveis. Se preferir, continue a conversa agora.'}
           </p>
           <p className="tabular mt-6 border-l border-copper pl-4 text-sm text-charcoal/55">
-            {status.sent.planLabel}, crédito de {formatCents(status.sent.creditCents)} em {status.sent.termMonths}{' '}
-            meses, parcela estimada de {formatCents(status.sent.installmentCents)}
+            {status.sent.planLabel}: {formatCents(status.sent.monthlyBudgetCents)} por mês, crédito estimado de{' '}
+            {formatCents(status.sent.creditCents)} em {status.sent.termMonths} meses
           </p>
           <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
             <ButtonLink
-              href={whatsappUrl(simulationMessage(status.sent, status.name))}
+              href={whatsappUrl(simulationMessage(status.sent, status.name, answerLabel('timeframe', answers.timeframe, status.sent.planNoun)))}
               target="_blank"
               rel="noopener noreferrer"
               variant="dark"
@@ -185,7 +203,13 @@ export function LeadCaptureForm({ snapshot }: Props) {
             </ButtonLink>
             <button
               type="button"
-              onClick={() => setStatus({ kind: 'idle' })}
+              onClick={() => {
+                setStatus({ kind: 'idle' });
+                if (!demo) {
+                  setStep('qualify');
+                  setAnswers(emptyAnswers());
+                }
+              }}
               className="link-draw self-start py-2 text-sm font-semibold text-charcoal/65 hover:text-charcoal sm:self-auto"
             >
               {demo ? 'Voltar ao formulário' : 'Enviar outra simulação'}
@@ -203,17 +227,19 @@ export function LeadCaptureForm({ snapshot }: Props) {
       <div className="lg:col-span-5">
         <h3 className="display text-[clamp(2rem,4.4vw,3.6rem)] text-charcoal">Gostou dessa possibilidade?</h3>
         <p className="mt-6 max-w-md leading-relaxed text-charcoal/65">
-          Deixe seus dados para receber mais informações e conversar com um especialista sobre as condições
-          disponíveis.
+          {step === 'qualify'
+            ? 'Responda quatro perguntas rápidas. Assim o especialista já chega com as opções certas para o seu caso.'
+            : 'Deixe seus dados para receber mais informações e conversar com um especialista sobre as condições disponíveis.'}
         </p>
+        <p className="mt-6 text-sm font-semibold text-wood">Passo {step === 'qualify' ? 1 : 2} de 2</p>
 
         {snapshot && (
           <dl className="mt-10 max-w-md border-t border-charcoal/15 text-sm">
             {[
-              ['Categoria', snapshot.planLabel],
-              ['Crédito', `R$ ${formatReais(Number(snapshot.creditCents / 100n))}`],
-              ['Prazo de referência', `${snapshot.termMonths} meses`],
-              ['Parcela estimada', formatCents(snapshot.installmentCents)],
+              ['Objetivo', snapshot.planLabel],
+              ['Cabe no seu mês', `R$ ${formatReais(Number(snapshot.monthlyBudgetCents / 100n))}`],
+              ['Crédito estimado', `R$ ${formatReais(Number(snapshot.creditCents / 100n))}`],
+              ['Prazo escolhido', `${snapshot.termMonths} meses`],
             ].map(([k, v]) => (
               <div key={k} className="flex items-baseline justify-between border-b border-charcoal/15 py-3">
                 <dt className="text-charcoal/55">{k}</dt>
@@ -224,6 +250,16 @@ export function LeadCaptureForm({ snapshot }: Props) {
         )}
       </div>
 
+      {step === 'qualify' ? (
+        <div className="lg:col-span-6 lg:col-start-7">
+          <QualificationStep
+            noun={noun}
+            answers={answers}
+            onAnswer={(q, v) => setAnswers((a) => ({ ...a, [q]: v }))}
+            onDone={goToContact}
+          />
+        </div>
+      ) : (
       <form
         noValidate
         onSubmit={handleSubmit}
@@ -299,8 +335,8 @@ export function LeadCaptureForm({ snapshot }: Props) {
         </Button>
 
         <p id={`${id}-purpose`} className="mt-5 text-[0.8rem] leading-relaxed text-charcoal/55">
-          Usamos seu nome e WhatsApp apenas para retornar o contato sobre esta simulação e enviar informações sobre
-          consórcio. Não pedimos CPF, documentos ou renda.{' '}
+          Usamos seu nome, WhatsApp e respostas apenas para retornar o contato sobre esta simulação. Não pedimos CPF,
+          documentos ou renda.{' '}
           <button
             type="button"
             onClick={openPrivacy}
@@ -309,7 +345,15 @@ export function LeadCaptureForm({ snapshot }: Props) {
             Aviso de privacidade
           </button>
         </p>
+        <button
+          type="button"
+          onClick={() => setStep('qualify')}
+          className="link-draw mt-6 self-start py-1 text-sm font-semibold text-charcoal/60 hover:text-charcoal"
+        >
+          Voltar às perguntas
+        </button>
       </form>
+      )}
     </div>
   );
 }

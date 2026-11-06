@@ -31,7 +31,7 @@ export function PlanSelector({ value, onChange }: Props) {
   };
 
   return (
-    <div role="radiogroup" aria-label="Plano de consórcio" className="border-t border-charcoal/15">
+    <div role="radiogroup" aria-label="Objetivo" className="border-t border-charcoal/15">
       {PLAN_ORDER.map((id) => {
         const active = id === value;
         const plan = PLANS[id];
@@ -63,7 +63,7 @@ export function PlanSelector({ value, onChange }: Props) {
               {plan.label}
             </span>
             <span className="tabular text-right text-xs leading-snug md:text-sm">
-              {plan.termMonths} meses
+              {Math.min(...plan.termOptions)} a {Math.max(...plan.termOptions)} meses
               <span className="hidden sm:block">{rangeText(id)}</span>
             </span>
           </button>

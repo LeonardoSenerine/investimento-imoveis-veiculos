@@ -13,12 +13,14 @@
 import { SITE, isLeadApiConfigured } from '../config/site';
 import type { Attribution } from '../lib/attribution';
 import { centsToDecimalString } from '../lib/money';
+import type { Answers, LeadTemperature } from '../config/qualification';
 import type { SimulationSnapshot } from '../types';
 
 export interface LeadInput {
   name: string;
   whatsapp: string; // E.164 sem "+", ex.: 5511912345678
   simulation: SimulationSnapshot;
+  qualification: { answers: Answers; score: number; temperature: LeadTemperature };
   attribution: Attribution;
   /** Campo isca anti-spam: deve chegar vazio. */
   honeypot: string;
@@ -31,11 +33,20 @@ export interface LeadPayload {
     plan_id: string;
     plan_label: string;
     category: string;
+    monthly_budget: string;
     credit_amount: string;
     term_months: number;
     estimated_installment: string;
     simulated_at: string;
     rules_status: 'preliminar';
+  };
+  qualification: {
+    timeframe: string | null;
+    savings: string | null;
+    purchase_type: string | null;
+    best_time: string | null;
+    score: number;
+    temperature: LeadTemperature;
   };
   attribution: Attribution;
   consent: {
@@ -56,7 +67,7 @@ export type SubmitResult =
   | { status: 'error'; message: string };
 
 export const LEAD_PURPOSE =
-  'Contato sobre a simulação realizada e envio de informações sobre consórcio.';
+  'Contato sobre a simulação realizada e envio de informações sobre o planejamento da compra.';
 
 export function buildLeadPayload(input: LeadInput): LeadPayload {
   const now = new Date().toISOString();
@@ -68,11 +79,20 @@ export function buildLeadPayload(input: LeadInput): LeadPayload {
       plan_id: s.planId,
       plan_label: s.planLabel,
       category: s.category,
+      monthly_budget: centsToDecimalString(s.monthlyBudgetCents),
       credit_amount: centsToDecimalString(s.creditCents),
       term_months: s.termMonths,
       estimated_installment: centsToDecimalString(s.installmentCents),
       simulated_at: s.simulatedAt,
       rules_status: 'preliminar',
+    },
+    qualification: {
+      timeframe: input.qualification.answers.timeframe,
+      savings: input.qualification.answers.savings,
+      purchase_type: input.qualification.answers.purchaseType,
+      best_time: input.qualification.answers.bestTime,
+      score: input.qualification.score,
+      temperature: input.qualification.temperature,
     },
     attribution: input.attribution,
     consent: {

@@ -94,7 +94,7 @@ export function Header() {
           </ul>
         </nav>
 
-        <ButtonLink href="#simulador" variant={scrolled ? 'primary' : 'outline'} size="md" icon={false} className="!min-h-10 md:!min-h-11 !text-[0.85rem]">
+        <ButtonLink href="#simulador" variant={scrolled ? 'primary' : 'outline'} size="sm" icon={false}>
           Simular
         </ButtonLink>
       </div>
