@@ -1,6 +1,7 @@
 import { MessageCircle, RotateCcw, Undo2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { PLANS, SIMULATION_DISCLAIMER } from '../config/simulators';
+import { IMAGES } from '../config/images';
+import { HEAT, PLANS, SIMULATION_DISCLAIMER } from '../config/simulators';
 import { useAnimatedNumber } from '../hooks/useAnimatedNumber';
 import { getAttribution } from '../lib/attribution';
 import { cn } from '../lib/cn';
@@ -13,6 +14,7 @@ import { submitLead } from '../services/leadService';
 import type { Contact, SimulationResult } from '../types';
 import { ChoiceGroup } from './funnel/fields';
 import { ButtonLink } from './ui/Button';
+import { StockImage } from './ui/StockImage';
 
 interface Props {
   result: SimulationResult;
@@ -23,26 +25,42 @@ interface Props {
 
 export const ZONE_COLOR: Record<HeatZone, string> = { quente: '#e0703f', morno: '#d9a66f', frio: '#8fa5bb' };
 
-const ZONE: Record<HeatZone, { word: string; title: string; talk: string; cta: string }> = {
+const pct = (n: number) => `${Math.round(n * 100)}%`;
+
+const ZONE: Record<HeatZone, { word: string; title: string; talk: string; cta: string; range: string; meaning: string }> = {
   quente: {
     word: 'Quente',
     title: 'Você consegue. Você tem o suficiente.',
     talk: 'Um especialista mostra, pelo WhatsApp, como transformar esse valor na sua conquista.',
     cta: 'Quero saber como',
+    range: `${pct(HEAT.hot)} ou mais da parcela`,
+    meaning: 'O que você guarda por mês já cobre a parcela. Dá para começar a planejar agora.',
   },
   morno: {
     word: 'Morna',
     title: 'Você está perto.',
     talk: 'Falta pouco. Um especialista ajuda a ajustar prazo ou valor para a conta fechar.',
     cta: 'Quero ajuda para chegar lá',
+    range: `de ${pct(HEAT.warm)} a ${Math.round(HEAT.hot * 100) - 1}% da parcela`,
+    meaning: 'Você já cobre quase toda a parcela. Um ajuste pequeno no prazo ou no valor fecha a conta.',
   },
   frio: {
     word: 'Fria',
     title: 'Ainda não fecha, mas tem caminho.',
     talk: 'Um especialista monta com você um plano que caiba no seu mês.',
     cta: 'Quero montar um plano possível',
+    range: `abaixo de ${pct(HEAT.warm)} da parcela`,
+    meaning: 'Hoje o valor ainda não cobre a parcela. Dá para chegar lá com mais prazo, um crédito menor ou guardando mais.',
   },
 };
+
+const ZONE_ORDER: HeatZone[] = ['quente', 'morno', 'frio'];
+
+const CONVERSATION_STEPS = [
+  'Você manda a mensagem, que já vai pronta com a sua simulação.',
+  'Um especialista confere seus números e tira suas dúvidas.',
+  'Você vê as opções com calma e decide se quer seguir. Nada é contratado na conversa.',
+];
 
 const sameRequest = (a: SimulationRequest, b: SimulationRequest) =>
   a.planId === b.planId && a.monthlyReais === b.monthlyReais && a.creditReais === b.creditReais && a.termMonths === b.termMonths;
@@ -83,14 +101,21 @@ function Thermometer({ heat }: { heat: number }) {
 
 /** Duas barras: o que a pessoa guarda × a parcela de referência. */
 function Comparison({ f, color }: { f: Feasibility; color: string }) {
+  const plan = PLANS[f.request.planId];
   const monthly = f.request.monthlyReais;
   const installment = Number(f.installmentCents) / 100;
   const scale = Math.max(monthly, installment) * 1.06;
   const wMonthly = useAnimatedNumber(monthly / scale, { duration: 1200 });
   const wInst = useAnimatedNumber(installment / scale, { duration: 1200 });
   const rows = [
-    { label: 'O que você guarda por mês', value: `R$ ${formatReais(monthly)}`, w: wMonthly, bar: color },
-    { label: 'Parcela de referência', value: formatCents(f.installmentCents), w: wInst, bar: 'rgb(243 240 234 / 0.35)' },
+    { label: 'O que você guarda por mês', value: `R$ ${formatReais(monthly)}`, w: wMonthly, bar: color, hint: null },
+    {
+      label: 'Parcela de referência',
+      value: formatCents(f.installmentCents),
+      w: wInst,
+      bar: 'rgb(243 240 234 / 0.35)',
+      hint: `Quanto seria preciso reservar por mês para ${plan.feminine ? 'a sua' : 'o seu'} ${plan.noun} de R$ ${formatReais(f.request.creditReais)} em ${f.request.termMonths} meses.`,
+    },
   ];
   return (
     <div className="space-y-4">
@@ -100,12 +125,57 @@ function Comparison({ f, color }: { f: Feasibility; color: string }) {
             <span className="text-offwhite/60">{r.label}</span>
             <span className="tabular font-semibold text-offwhite">{r.value}</span>
           </div>
-          <div className="mt-2 h-2 rounded-full bg-offwhite/[0.06]">
+          <div className="mt-2 h-2 rounded-full bg-offwhite/[0.08]">
             <div className="h-full rounded-full" style={{ width: `${r.w * 100}%`, background: r.bar }} />
           </div>
+          {r.hint && <p className="mt-2 text-[0.8rem] leading-relaxed text-offwhite/55">{r.hint}</p>}
         </div>
       ))}
     </div>
+  );
+}
+
+/** Frase simples do percentual: "para cada R$ 100 da parcela…". */
+function plainRatio(f: Feasibility): string {
+  if (f.fits) {
+    return f.leftoverCents > 0n
+      ? `Seu valor cobre a parcela inteira e ainda sobram ${formatCents(f.leftoverCents)} por mês.`
+      : 'Seu valor cobre a parcela inteira.';
+  }
+  const gap = f.installmentCents - BigInt(f.request.monthlyReais) * 100n;
+  return `Para cada R$ 100 da parcela, você já tem R$ ${Math.floor(f.ratio * 100)}. Faltam ${formatCents(gap)} por mês.`;
+}
+
+/** As três zonas em linguagem simples, com a da pessoa em destaque. */
+function ZoneGuide({ current }: { current: HeatZone }) {
+  return (
+    <ul className="space-y-2">
+      {ZONE_ORDER.map((z) => {
+        const on = z === current;
+        const c = ZONE_COLOR[z];
+        return (
+          <li
+            key={z}
+            className={cn('rounded-md p-4 transition-[background-color,box-shadow] duration-500', on ? 'bg-charcoal/70' : 'bg-transparent')}
+            style={{ boxShadow: on ? `inset 0 0 0 1.5px ${c}` : 'inset 0 0 0 1px rgb(243 240 234 / 0.08)' }}
+          >
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span aria-hidden="true" className="size-2.5 rounded-full" style={{ backgroundColor: c }} />
+              <span className="font-display font-semibold text-offwhite">Zona {ZONE[z].word.toLowerCase()}</span>
+              <span className="text-[0.8rem] text-offwhite/50">{ZONE[z].range}</span>
+              {on && (
+                <span className="ml-auto rounded-full px-2.5 py-0.5 text-[0.72rem] font-semibold text-charcoal" style={{ backgroundColor: c }}>
+                  Você está aqui
+                </span>
+              )}
+            </div>
+            <p className={cn('mt-1.5 pl-[1.375rem] text-[0.9rem] leading-relaxed', on ? 'text-offwhite/80' : 'text-offwhite/50')}>
+              {ZONE[z].meaning}
+            </p>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
@@ -179,10 +249,25 @@ export function ResultPage({ result, contact, honeypot, onRestart }: Props) {
       aria-labelledby="resultado-title"
       className="grain relative isolate min-h-[100svh] overflow-hidden bg-charcoal pb-36 pt-24 md:pt-28 lg:pb-24"
     >
+      {/* Mesmo fundo do hero, fixo enquanto a página rola (o clip-path recorta o fixed à seção) */}
+      <div aria-hidden="true" className="absolute inset-0 -z-20 [clip-path:inset(0)]">
+        <div className="fixed inset-0">
+          <StockImage
+            image={IMAGES.hero}
+            widths={[640, 960, 1280, 1600, 1920, 2560, 3200]}
+            sizes="100vw"
+            quality={82}
+            className="h-full w-full object-cover"
+            style={{ filter: 'contrast(1.06) saturate(1.04)' }}
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(21_21_21/0.8)_0%,rgb(21_21_21/0.66)_40%,rgb(21_21_21/0.9)_100%)] lg:bg-[linear-gradient(90deg,rgb(21_21_21/0.92)_0%,rgb(21_21_21/0.72)_55%,rgb(21_21_21/0.5)_100%)]" />
+        </div>
+      </div>
+
       {/* Calor ambiente: um brilho na cor da zona que respira devagar */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-[20vw] -top-[20vw] -z-10 size-[80vw] rounded-full opacity-40 blur-[120px] motion-safe:animate-breathe lg:size-[55vw]"
+        className="pointer-events-none absolute -right-[20vw] -top-[20vw] -z-10 size-[80vw] rounded-full opacity-30 blur-[120px] motion-safe:animate-breathe lg:size-[55vw]"
         style={{ backgroundColor: color, transition: 'background-color 900ms var(--ease-soft)' }}
       />
 
@@ -242,25 +327,58 @@ export function ResultPage({ result, contact, honeypot, onRestart }: Props) {
               <p className="mt-3 text-center text-[0.8rem] text-offwhite/50">
                 Pelo WhatsApp. Sua simulação já vai na mensagem.
               </p>
+
+              <div className="mt-6 border-t border-offwhite/10 pt-5">
+                <p className="text-sm font-semibold text-offwhite/85">Como é a conversa</p>
+                <ol className="mt-3 space-y-3">
+                  {CONVERSATION_STEPS.map((step, i) => (
+                    <li key={step} className="flex gap-3 text-[0.9rem] leading-relaxed text-offwhite/70">
+                      <span
+                        aria-hidden="true"
+                        className="tabular grid size-6 shrink-0 place-items-center rounded-full text-xs font-semibold text-charcoal"
+                        style={{ backgroundColor: color, transition: 'background-color 700ms var(--ease-soft)' }}
+                      >
+                        {i + 1}
+                      </span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* C. Entenda a temperatura */}
-        <div className="space-y-8 lg:col-span-7">
-          <Thermometer heat={f.heat} />
-          <Comparison f={f} color={color} />
-          {f.fits && f.leftoverCents > 0n && (
-            <p className="text-sm text-offwhite/65">
-              E ainda sobram <span className="tabular font-semibold text-offwhite">{formatCents(f.leftoverCents)}</span> por
-              mês.
+        {/* C. Entenda seu resultado, em linguagem simples */}
+        <div className="lg:col-span-7">
+          <div className="rounded-xl bg-charcoal/65 p-5 shadow-[inset_0_0_0_1px_rgb(243_240_234/0.1)] backdrop-blur-md sm:p-7">
+            <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-offwhite">O que isso significa</h2>
+            <p className="mt-2 text-[0.95rem] leading-relaxed text-offwhite/70">
+              A zona de calor compara o que você consegue guardar por mês com a parcela de referência da sua simulação.
+              Quanto mais perto de cobrir a parcela, mais quente.
             </p>
-          )}
+
+            <div className="mt-6">
+              <Thermometer heat={f.heat} />
+            </div>
+            <p className="mt-3 text-[0.95rem] font-semibold leading-relaxed text-offwhite">{plainRatio(f)}</p>
+
+            <div className="mt-6">
+              <Comparison f={f} color={color} />
+            </div>
+
+            <div className="mt-7 border-t border-offwhite/10 pt-6">
+              <p className="text-sm font-semibold text-offwhite/85">As três zonas</p>
+              <div className="mt-3">
+                <ZoneGuide current={f.zone} />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* D. E se… (ajustes ao vivo) */}
         <div className="lg:col-span-7">
-          <div className="rounded-xl bg-offwhite/[0.04] p-5 shadow-[inset_0_0_0_1px_rgb(243_240_234/0.1)] sm:p-7">
+          <div className="rounded-xl bg-charcoal/65 p-5 shadow-[inset_0_0_0_1px_rgb(243_240_234/0.1)] backdrop-blur-md sm:p-7">
             <div className="flex items-baseline justify-between gap-4">
               <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-offwhite">E se…</h2>
               {changed && (
