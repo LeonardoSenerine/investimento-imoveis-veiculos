@@ -1,124 +1,89 @@
 import { describe, expect, it } from 'vitest';
 import { PLANS } from '../config/simulators';
-import { monthlyRange, simulate, simulateFromMonthly } from './calculator';
+import { checkCredit, estimateCreditFromMonthly, estimateInstallmentCents } from './calculator';
+import { evaluate } from './feasibility';
 import { formatCents, parseReaisInput } from './money';
 
-const installment = (planId: Parameters<typeof simulate>[0], value: number) => {
-  const r = simulate(planId, value);
-  if (r.status !== 'ok') throw new Error(`esperado ok, recebido ${r.status}`);
-  return formatCents(r.installmentCents);
-};
+const installment = (planId: keyof typeof PLANS, credit: number, term?: number) =>
+  formatCents(estimateInstallmentCents(PLANS[planId], credit, term));
 
 describe('fórmulas preliminares do cliente', () => {
-  it('imóvel: R$ 500.000 → R$ 2.822,73', () => {
+  it('imóvel: R$ 500.000 em 220 meses → R$ 2.822,73', () => {
     expect(installment('imovel', 500_000)).toBe('R$ 2.822,73');
   });
-  it('moto: R$ 20.000 → R$ 427,33', () => {
+  it('moto: R$ 20.000 em 60 meses → R$ 427,33', () => {
     expect(installment('moto', 20_000)).toBe('R$ 427,33');
   });
-  it('automóvel: R$ 100.000 → R$ 1.291,11', () => {
+  it('carro: R$ 100.000 em 90 meses → R$ 1.291,11', () => {
     expect(installment('automovel', 100_000)).toBe('R$ 1.291,11');
   });
   it('arredonda ao centavo mais próximo (half-up)', () => {
-    // 35.000 × 1,162 ÷ 90 = 451,8888… → 451,89
     expect(installment('automovel', 35_000)).toBe('R$ 451,89');
   });
+  it('prazo fora das opções volta ao padrão', () => {
+    expect(installment('imovel', 500_000, 999)).toBe('R$ 2.822,73');
+  });
+  it('fórmula inversa arredonda o crédito para baixo', () => {
+    expect(estimateCreditFromMonthly(PLANS.automovel, 1_000, 90)).toBe(77_000);
+  });
 });
 
-describe('faixas', () => {
+describe('faixas de crédito', () => {
   it('não calcula entre R$ 30 mil e R$ 35 mil', () => {
-    expect(simulate('moto', 32_000).status).toBe('unvalidated_range');
-    expect(simulate('automovel', 34_999).status).toBe('unvalidated_range');
+    expect(checkCredit('moto', 32_000)).toEqual({ ok: false, reason: 'unvalidated' });
+    expect(checkCredit('automovel', 34_999)).toEqual({ ok: false, reason: 'unvalidated' });
   });
   it('limites exatos são válidos', () => {
-    expect(simulate('moto', 30_000).status).toBe('ok');
-    expect(simulate('automovel', 35_000).status).toBe('ok');
+    expect(checkCredit('moto', 30_000).ok).toBe(true);
+    expect(checkCredit('automovel', 35_000).ok).toBe(true);
   });
-  it('sugere o plano adequado fora da faixa', () => {
-    const r = simulate('moto', 80_000);
-    expect(r.status).toBe('out_of_range');
-    if (r.status === 'out_of_range') expect(r.suggestedPlanId).toBe('automovel');
+  it('sugere o tipo certo fora da faixa', () => {
+    expect(checkCredit('moto', 80_000)).toEqual({ ok: false, reason: 'above_max', suggestedPlanId: 'automovel' });
   });
-  it('campo vazio', () => {
-    expect(simulate('imovel', null).status).toBe('empty');
+  it('vazio', () => {
+    expect(checkCredit('imovel', null)).toEqual({ ok: false, reason: 'empty' });
   });
 });
 
-describe('fluxo pelo valor mensal (fórmula inversa)', () => {
-  const credit = (planId: Parameters<typeof simulate>[0], monthly: number) => {
-    const r = simulateFromMonthly(planId, monthly);
-    if (r.status !== 'ok') throw new Error(`esperado ok, recebido ${r.status}`);
-    return { credit: r.creditReais, installment: formatCents(r.installmentCents) };
-  };
-
-  it('imóvel: R$ 2.800/mês → crédito de R$ 495.000 (parcela de referência R$ 2.794,50)', () => {
-    expect(credit('imovel', 2_800)).toEqual({ credit: 495_000, installment: 'R$ 2.794,50' });
+describe('zona de calor', () => {
+  it('exemplo do cliente: guarda R$ 10 mil e precisa de R$ 100 mil → quente', () => {
+    const r = evaluate({ planId: 'imovel', monthlyReais: 10_000, creditReais: 100_000, termMonths: 220 });
+    expect(r.fits).toBe(true);
+    expect(r.zone).toBe('quente');
+    expect(r.heat).toBe(1);
+    expect(r.tips).toEqual([]);
   });
-  it('automóvel: R$ 1.300/mês → R$ 100.000 (exemplo do cliente)', () => {
-    expect(credit('automovel', 1_300)).toEqual({ credit: 100_000, installment: 'R$ 1.291,11' });
+  it('cabe com folga pequena → quente, informa a sobra', () => {
+    const r = evaluate({ planId: 'automovel', monthlyReais: 1_300, creditReais: 100_000, termMonths: 90 });
+    expect(r.zone).toBe('quente');
+    expect(formatCents(r.leftoverCents)).toBe('R$ 8,89');
   });
-  it('moto: R$ 430/mês → R$ 20.000 (exemplo do cliente)', () => {
-    expect(credit('moto', 430)).toEqual({ credit: 20_000, installment: 'R$ 427,33' });
+  it('perto (75% a 99%) → morno, com dicas concretas', () => {
+    const r = evaluate({ planId: 'automovel', monthlyReais: 1_000, creditReais: 100_000, termMonths: 90 });
+    expect(r.zone).toBe('morno');
+    expect(r.fits).toBe(false);
+    // 100 meses ainda não cabe (R$ 1.162,00), então não há dica de prazo.
+    expect(r.tips.map((t) => t.kind)).toEqual(['credit', 'monthly']);
+    const credit = r.tips.find((t) => t.kind === 'credit');
+    expect(credit && credit.kind === 'credit' && credit.creditReais).toBe(77_000);
+    const monthly = r.tips.find((t) => t.kind === 'monthly');
+    expect(monthly && monthly.kind === 'monthly' && formatCents(monthly.extraCents)).toBe('R$ 292,00');
   });
-  it('a parcela de referência nunca ultrapassa o valor mensal informado', () => {
-    for (const planId of ['imovel', 'automovel', 'moto'] as const) {
-      const { min, max } = monthlyRange(PLANS[planId]);
-      for (let m = min; m <= max; m += Math.max(1, Math.round((max - min) / 37))) {
-        const r = simulateFromMonthly(planId, m);
-        expect(r.status).toBe('ok');
-        if (r.status === 'ok') expect(r.installmentCents <= BigInt(m) * 100n).toBe(true);
-      }
-    }
+  it('dica de prazo maior quando ele resolve', () => {
+    const r = evaluate({ planId: 'automovel', monthlyReais: 1_200, creditReais: 100_000, termMonths: 90 });
+    const term = r.tips.find((t) => t.kind === 'term');
+    expect(term && term.kind === 'term' && term.termMonths).toBe(100);
+    expect(term && term.kind === 'term' && formatCents(term.installmentCents)).toBe('R$ 1.162,00');
   });
-  it('faixas mensais derivadas da faixa de crédito', () => {
-    expect(monthlyRange(PLANS.imovel)).toEqual({ min: 600, max: 11_250 });
-    expect(monthlyRange(PLANS.automovel)).toEqual({ min: 460, max: 5_160 });
-    expect(monthlyRange(PLANS.moto)).toEqual({ min: 175, max: 640 });
+  it('longe (abaixo de 75%) → frio', () => {
+    const r = evaluate({ planId: 'automovel', monthlyReais: 500, creditReais: 100_000, termMonths: 90 });
+    expect(r.zone).toBe('frio');
+    expect(r.heat).toBeGreaterThan(0);
+    expect(r.heat).toBeLessThan(0.54);
   });
-  it('valor mensal fora da faixa não inventa crédito', () => {
-    expect(simulateFromMonthly('automovel', 300).status).toBe('out_of_range');
-    expect(simulateFromMonthly('moto', 660).status).toBe('unvalidated_range');
-    expect(simulateFromMonthly('imovel', null).status).toBe('empty');
-  });
-});
-
-describe('prazo escolhido pela pessoa (mesmo fator em todos os prazos)', () => {
-  it('imóvel: R$ 2.800/mês em 120 meses → R$ 270.000 (parcela R$ 2.794,50)', () => {
-    const r = simulateFromMonthly('imovel', 2_800, 120);
-    expect(r.status).toBe('ok');
-    if (r.status === 'ok') {
-      expect(r.creditReais).toBe(270_000);
-      expect(r.termMonths).toBe(120);
-      expect(formatCents(r.installmentCents)).toBe('R$ 2.794,50');
-    }
-  });
-  it('prazo maior rende mais crédito com o mesmo valor mensal', () => {
-    const credit = (t: number) => {
-      const r = simulateFromMonthly('automovel', 1_300, t);
-      return r.status === 'ok' ? r.creditReais : 0;
-    };
-    expect(credit(36)).toBeLessThan(credit(60));
-    expect(credit(60)).toBeLessThan(credit(100));
-  });
-  it('faixa mensal acompanha o prazo', () => {
-    expect(monthlyRange(PLANS.imovel, 120)).toEqual({ min: 1_050, max: 20_700 });
-    expect(monthlyRange(PLANS.moto, 24).min).toBeGreaterThan(monthlyRange(PLANS.moto, 72).min);
-  });
-  it('prazo fora das opções volta ao padrão', () => {
-    const r = simulateFromMonthly('imovel', 2_800, 999);
-    expect(r.status === 'ok' && r.termMonths).toBe(220);
-  });
-  it('parcela nunca passa do valor mensal em nenhum prazo', () => {
-    for (const planId of ['imovel', 'automovel', 'moto'] as const) {
-      for (const t of PLANS[planId].termOptions) {
-        const { min, max } = monthlyRange(PLANS[planId], t);
-        for (let m = min; m <= max; m += Math.max(1, Math.round((max - min) / 23))) {
-          const r = simulateFromMonthly(planId, m, t);
-          expect(r.status).toBe('ok');
-          if (r.status === 'ok') expect(r.installmentCents <= BigInt(m) * 100n).toBe(true);
-        }
-      }
-    }
+  it('dica de crédito some quando o que cabe fica abaixo da faixa do plano', () => {
+    const r = evaluate({ planId: 'imovel', monthlyReais: 300, creditReais: 500_000, termMonths: 220 });
+    expect(r.tips.some((t) => t.kind === 'credit')).toBe(false);
   });
 });
 

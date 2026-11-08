@@ -14,6 +14,8 @@ export type TrackingEvent =
   | 'simulation_started'
   | 'simulation_completed'
   | 'lead_form_submitted'
+  | 'result_viewed'
+  | 'scenario_adjusted'
   | 'whatsapp_clicked';
 
 type Params = Record<string, string | number | boolean | undefined>;
@@ -39,6 +41,8 @@ const META_EVENTS: Record<TrackingEvent, { name: string; custom: boolean }> = {
   simulation_started: { name: 'SimulationStarted', custom: true },
   simulation_completed: { name: 'SimulationCompleted', custom: true },
   lead_form_submitted: { name: 'Lead', custom: false },
+  result_viewed: { name: 'ViewContent', custom: false },
+  scenario_adjusted: { name: 'ScenarioAdjusted', custom: true },
   whatsapp_clicked: { name: 'Contact', custom: false },
 };
 

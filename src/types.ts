@@ -1,25 +1,20 @@
-import type { Category, PlanId, VehicleKind } from './config/simulators';
+import type { Feasibility } from './lib/feasibility';
 
-/** Simulação vinculada ao cadastro. */
-export interface SimulationSnapshot {
-  planId: PlanId;
-  planLabel: string;
-  planNoun: string;
-  category: Category;
-  /** Quanto a pessoa disse que pode investir por mês. */
-  monthlyBudgetCents: bigint;
-  /** Crédito estimado (arredondado para baixo) que cabe nesse valor. */
-  creditCents: bigint;
-  /** Parcela de referência do crédito estimado (≤ valor mensal informado). */
-  installmentCents: bigint;
-  termMonths: number;
-  /** ISO 8601 do momento em que o resultado foi calculado. */
-  simulatedAt: string;
+/** Contato informado no segundo passo, junto com a simulação. */
+export interface Contact {
+  name: string;
+  /** E.164 sem "+", ex.: 5511912345678 */
+  whatsapp: string;
+  /** Id devolvido pela API no envio (quando houver). */
+  leadId?: string;
+  /** true quando a API confirmou o recebimento do lead. */
+  synced?: boolean;
 }
 
-export interface GoalSelection {
-  category: Category;
-  vehicleKind?: VehicleKind;
-  /** Muda a cada seleção para reaplicar mesmo se a categoria for a mesma. */
-  nonce: number;
+/** Resultado de uma simulação, com identificador para reanimar a zona de calor. */
+export interface SimulationResult {
+  id: number;
+  feasibility: Feasibility;
+  /** ISO 8601 do momento da simulação. */
+  simulatedAt: string;
 }

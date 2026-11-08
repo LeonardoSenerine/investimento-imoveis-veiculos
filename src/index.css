@@ -14,6 +14,9 @@
   --color-wood-dark: #5e4532;
   --color-alert: #e59b85;
   --color-alert-dark: #a4452c;
+  /* Zona de calor (tons complementares, usados só no termômetro e na palavra da zona) */
+  --color-heat-cold: #8fa5bb;
+  --color-heat-hot: #e0703f;
 
   /* Uma família, duas larguras: expandida nos títulos (emblema automotivo,
      letreiro de arquitetura), normal no texto corrido. */
@@ -28,10 +31,19 @@
   --animate-reveal-panel: reveal-panel 0.9s var(--ease-expo) both;
   --animate-draw: draw 0.9s 0.15s var(--ease-expo) both;
   --animate-scroll-cue: scroll-cue 2.4s var(--ease-inout) infinite;
+  --animate-breathe: breathe 7s ease-in-out infinite alternate;
 
   @keyframes tick {
     from { transform: translateY(0.18em); opacity: 0.4; }
     to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes breathe {
+    from { transform: scale(1); opacity: 0.32; }
+    to { transform: scale(1.14); opacity: 0.5; }
+  }
+  @keyframes teleport {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
   }
   @keyframes reveal-panel {
     from { clip-path: inset(0 0 100% 0); transform: translateY(24px); }

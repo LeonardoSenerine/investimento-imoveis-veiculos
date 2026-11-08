@@ -55,16 +55,15 @@ export const PrivacyNotice = forwardRef<HTMLDialogElement>(function PrivacyNotic
         <div className="overflow-y-auto px-6 py-6 md:px-8">
           <Block title="Quem trata seus dados">
             <p>
-              Este site é mantido por um profissional de vendas de consórcios que atua como consultor comercial. Ele
-              não é uma administradora de consórcios. Os planos são administrados por administradoras autorizadas
-              pelo Banco Central do Brasil.
+              Este site é mantido por um consultor comercial independente. Os planos apresentados no atendimento são
+              administrados por empresas autorizadas e fiscalizadas pelo Banco Central do Brasil.
             </p>
           </Block>
           <Block title="Quais dados coletamos">
             <p>
-              Nome e número de WhatsApp informados por você; os dados da simulação (categoria, crédito, prazo,
-              parcela estimada e data); e a origem da visita (parâmetros de campanha como utm_source, página de
-              entrada e referência).
+              Nome e número de celular informados por você; os dados da simulação (objetivo, quanto você guarda por
+              mês, crédito, prazo, resultado e data); e a origem da visita (parâmetros de campanha como utm_source,
+              página de entrada e referência).
             </p>
             <p>
               Quando ativas, ferramentas de medição (Google Tag Manager e Meta Pixel) podem registrar dados de
@@ -73,13 +72,13 @@ export const PrivacyNotice = forwardRef<HTMLDialogElement>(function PrivacyNotic
           </Block>
           <Block title="Para que usamos">
             <p>
-              Para retornar o contato sobre a simulação realizada, apresentar informações e condições de planos de
-              consórcio e medir o desempenho das campanhas. Não solicitamos CPF, documentos ou renda nesta etapa.
+              Para retornar o contato sobre a simulação realizada, apresentar as condições disponíveis e medir o
+              desempenho das campanhas. Não solicitamos CPF, documentos ou renda nesta etapa.
             </p>
           </Block>
           <Block title="Compartilhamento">
             <p>
-              Seus dados não são vendidos. Eles só são compartilhados com uma administradora de consórcios se você
+              Seus dados não são vendidos. Eles só são compartilhados com a empresa responsável pelo plano se você
               decidir seguir com uma proposta, e na medida necessária para isso.
             </p>
           </Block>

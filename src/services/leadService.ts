@@ -1,64 +1,56 @@
 /**
- * Integração com o backend de leads.
+ * Integração com o backend de leads:
  *
- * Contrato esperado (ver docs/api-contract.md):
- *   POST {VITE_LEAD_API_URL}
- *   Content-Type: application/json
+ *  1. stage "simulation": envio único ao clicar em Simular, com valores,
+ *     nome, celular e a zona de calor.
+ *  2. stage "update": quando a pessoa ajusta o cenário na página de resultado
+ *     e clica para conversar, atualiza o mesmo lead (`lead_id` e celular).
+ *
+ * Contrato (ver docs/api-contract.md):
+ *   POST {VITE_LEAD_API_URL}  Content-Type: application/json
  *   → 2xx { "id": "..." }  sucesso confirmado
  *   → 4xx/5xx               erro
  *
- * Sem URL configurada, retorna `demo` — nada é enviado e nenhum evento de
+ * Sem URL configurada, retorna `demo`: nada é enviado e nenhum evento de
  * conversão deve ser disparado.
  */
+import { PLANS } from '../config/simulators';
 import { SITE, isLeadApiConfigured } from '../config/site';
 import type { Attribution } from '../lib/attribution';
+import type { Feasibility, HeatZone } from '../lib/feasibility';
 import { centsToDecimalString } from '../lib/money';
-import type { Answers, LeadTemperature } from '../config/qualification';
-import type { SimulationSnapshot } from '../types';
+import type { Contact } from '../types';
 
 export interface LeadInput {
-  name: string;
-  whatsapp: string; // E.164 sem "+", ex.: 5511912345678
-  simulation: SimulationSnapshot;
-  qualification: { answers: Answers; score: number; temperature: LeadTemperature };
+  stage: 'simulation' | 'update';
+  contact: Contact;
+  simulation?: { feasibility: Feasibility; simulatedAt: string };
   attribution: Attribution;
   /** Campo isca anti-spam: deve chegar vazio. */
   honeypot: string;
 }
 
 export interface LeadPayload {
+  stage: 'simulation' | 'update';
+  lead_id: string | null;
   name: string;
   whatsapp: string;
   simulation: {
     plan_id: string;
     plan_label: string;
-    category: string;
-    monthly_budget: string;
-    credit_amount: string;
+    monthly_savings: string;
+    credit_needed: string;
     term_months: number;
-    estimated_installment: string;
+    reference_installment: string;
+    fits: boolean;
+    heat_zone: HeatZone;
+    ratio: number;
     simulated_at: string;
     rules_status: 'preliminar';
-  };
-  qualification: {
-    timeframe: string | null;
-    savings: string | null;
-    purchase_type: string | null;
-    best_time: string | null;
-    score: number;
-    temperature: LeadTemperature;
-  };
+  } | null;
   attribution: Attribution;
-  consent: {
-    purpose: string;
-    privacy_notice_version: string;
-    accepted_at: string;
-  };
-  meta: {
-    page_url: string;
-    submitted_at: string;
-    hp: string;
-  };
+  consent: { purpose: string; privacy_notice_version: string; accepted_at: string };
+  meta: { page_url: string; submitted_at: string; hp: string };
 }
 
 export type SubmitResult =
@@ -66,45 +58,36 @@ export type SubmitResult =
   | { status: 'demo'; payload: LeadPayload }
   | { status: 'error'; message: string };
 
-export const LEAD_PURPOSE =
-  'Contato sobre a simulação realizada e envio de informações sobre o planejamento da compra.';
+export const LEAD_PURPOSE = 'Contato sobre a simulação realizada e envio de informações sobre o planejamento da compra.';
 
 export function buildLeadPayload(input: LeadInput): LeadPayload {
   const now = new Date().toISOString();
   const s = input.simulation;
+  const f = s?.feasibility;
   return {
-    name: input.name.trim().replace(/\s+/g, ' '),
-    whatsapp: input.whatsapp,
-    simulation: {
-      plan_id: s.planId,
-      plan_label: s.planLabel,
-      category: s.category,
-      monthly_budget: centsToDecimalString(s.monthlyBudgetCents),
-      credit_amount: centsToDecimalString(s.creditCents),
-      term_months: s.termMonths,
-      estimated_installment: centsToDecimalString(s.installmentCents),
-      simulated_at: s.simulatedAt,
-      rules_status: 'preliminar',
-    },
-    qualification: {
-      timeframe: input.qualification.answers.timeframe,
-      savings: input.qualification.answers.savings,
-      purchase_type: input.qualification.answers.purchaseType,
-      best_time: input.qualification.answers.bestTime,
-      score: input.qualification.score,
-      temperature: input.qualification.temperature,
-    },
+    stage: input.stage,
+    lead_id: input.contact.leadId ?? null,
+    name: input.contact.name.trim().replace(/\s+/g, ' '),
+    whatsapp: input.contact.whatsapp,
+    simulation:
+      s && f
+        ? {
+            plan_id: f.request.planId,
+            plan_label: PLANS[f.request.planId].label,
+            monthly_savings: `${f.request.monthlyReais}.00`,
+            credit_needed: `${f.request.creditReais}.00`,
+            term_months: f.request.termMonths,
+            reference_installment: centsToDecimalString(f.installmentCents),
+            fits: f.fits,
+            heat_zone: f.zone,
+            ratio: Math.round(f.ratio * 1000) / 1000,
+            simulated_at: s.simulatedAt,
+            rules_status: 'preliminar',
+          }
+        : null,
     attribution: input.attribution,
-    consent: {
-      purpose: LEAD_PURPOSE,
-      privacy_notice_version: SITE.privacyNoticeVersion,
-      accepted_at: now,
-    },
-    meta: {
-      page_url: window.location.href,
-      submitted_at: now,
-      hp: input.honeypot,
-    },
+    consent: { purpose: LEAD_PURPOSE, privacy_notice_version: SITE.privacyNoticeVersion, accepted_at: now },
+    meta: { page_url: window.location.href, submitted_at: now, hp: input.honeypot },
   };
 }
 
@@ -114,7 +97,7 @@ export async function submitLead(input: LeadInput): Promise<SubmitResult> {
   const payload = buildLeadPayload(input);
 
   if (!isLeadApiConfigured) {
-    if (import.meta.env.DEV) console.info('[lead] modo demonstração, payload:', payload);
+    if (import.meta.env.DEV) console.info(`[lead] modo demonstração (${input.stage}), payload:`, payload);
     return { status: 'demo', payload };
   }
 

@@ -1,4 +1,4 @@
-# Landing page — Consórcios (Imóveis · Veículos)
+# Chave: simulação de imóvel, carro e moto
 
 Landing page de conversão para tráfego pago (Meta Ads / Google Ads).
 React + TypeScript + Vite + Tailwind CSS 4 + GSAP (ScrollTrigger) + Lucide.
@@ -27,44 +27,61 @@ npm run build          # gera /dist
 | Hospedar imagens no próprio CDN (opcional) | `src/config/images.ts` | Usa CDN Unsplash otimizado |
 | Domínio público para a capa de link | `.env.production` (`VITE_SITE_URL`) | Configurado: investimento-imoveis-veiculos.vercel.app |
 
-Enquanto a API ou o WhatsApp não estiverem configurados, o rodapé e o formulário mostram o selo **Modo demonstração**.
+Enquanto a API ou o WhatsApp não estiverem configurados, o rodapé e o formulário mostram o aviso **Modo demonstração**.
+
+O site não usa a palavra "consórcio" (pedido do cliente). Para manter a transparência, ele não fala em empréstimo, financiamento ou rendimento, e informa que valores, prazos e a forma de liberação do crédito são apresentados no atendimento, antes de qualquer contratação.
 
 ## Arquitetura
 
 ```
 src/
   motion/        gsap.ts (registro/config) · useMotion.ts (escopo + limpeza)
-                 useScrollReveals.ts (reveals declarativos por data-attribute)
-  config/        simulators.ts (regras e faixas) · site.ts (env) · images.ts
-  lib/           money.ts (BigInt, centavos) · calculator.ts · validation.ts
-                 tracking.ts (GTM/Pixel) · attribution.ts (UTMs) · whatsapp.ts
-  services/      leadService.ts (integração com backend)
-  content/       faq.ts
-  components/    Header · Hero · GoalSelector · HowItWorks · FAQ · FinalCTA
-                 LeadCaptureForm · WhatsAppButton · Footer
-    simulator/   SimulatorSection · PropertySimulator · VehicleSimulator
-                 CreditInput · SimulationResult
+  config/        simulators.ts (fatores, prazos, faixas, zonas de calor) · site.ts (env) · images.ts
+  lib/           money.ts (BigInt, centavos) · calculator.ts · feasibility.ts (consegue ou não, dicas, zona)
+                 tips.ts (textos das dicas) · validation.ts · tracking.ts · attribution.ts · whatsapp.ts
+  services/      leadService.ts (envio único ao simular; `update` se o cenário mudar)
+  components/    Header (só a marca) · Hero (formulário na entrada) · ResultPage (/resultado) · Footer
+    funnel/      ValuesStep · ContactStep · fields (TextField, MoneyField, ChoiceGroup)
     privacy/     PrivacyNotice · PrivacyContext
-                 PlanSelector
-    ui/          Button · StockImage · Type (Lines, Words, Label)
+    ui/          Button · StockImage · Type (Lines, Words)
 ```
-
-### Cálculo
-
-`parcela = (crédito × fator) ÷ prazo`, calculada em **centavos com BigInt** e arredondamento half-up.
-Nenhum número de regra fica fora de `config/simulators.ts`. Exemplos do cliente cobertos por teste:
-
-- Imóvel R$ 500.000 → **R$ 2.822,73** (220 meses)
-- Moto R$ 20.000 → **R$ 427,33** (60 meses)
-- Automóvel R$ 100.000 → **R$ 1.291,11** (90 meses)
 
 ### Jornada
 
-1. Hero → CTA leva direto ao simulador.
-2. Cards de objetivo pré-selecionam a categoria (e o tipo de veículo).
-3. Campo monetário + slider sincronizados; resultado instantâneo.
-4. O cadastro só aparece **depois** da simulação (ao parar de ajustar ou ao clicar em “Gostei, quero continuar”).
-5. Após o envio confirmado: confirmação + WhatsApp com mensagem contextualizada.
+Duas páginas: o formulário (`/`) e o resultado (`/resultado`). O `vercel.json` reescreve
+`/resultado` para o app; abrir esse endereço direto, sem simulação, volta ao formulário.
+
+1. Passo 1, **valores**: imóvel, carro ou moto, **quanto consegue guardar por mês**, **de quanto crédito
+   precisa** e **em quantos meses**. O botão **Continuar** fica bloqueado até tudo estar preenchido e válido,
+   com uma linha dizendo o que falta.
+2. Passo 2, **nome e celular**, com o resumo dos valores e um atalho "Alterar". O botão **Simular** só
+   libera com nome e celular válidos. Ao simular, o lead é enviado uma única vez (valores + contato);
+   o resultado abre assim que a API confirma, ou em no máximo 4 s.
+3. **Teletransporte**: uma cortina na cor da temperatura cobre a tela, mostra a zona e se abre já na
+   página de resultado. O botão "voltar" do celular retorna ao formulário com os valores preenchidos.
+4. **Página de resultado**, com a conversa em destaque:
+   - zona (Quente, Morna, Fria) e o percentual da parcela que a pessoa já guarda, em contagem animada;
+   - cartão "Fulano, vamos conversar?" com o botão do WhatsApp (mensagem já preenchida);
+     no celular, o botão fica fixo no rodapé ao rolar;
+   - termômetro e barras comparando o que ela guarda com a parcela de referência;
+   - **"E se…"**: controle de quanto guardar e escolha do prazo, com a temperatura mudando ao vivo,
+     e as dicas como botões que aplicam o ajuste. Se ela ajustou, o cenário final segue com o lead
+     ao clicar no WhatsApp.
+
+### Cálculo e zona de calor
+
+`parcela de referência = (crédito × fator) ÷ prazo`, em **centavos com BigInt** e arredondamento half-up.
+Exemplos do cliente cobertos por teste: imóvel R$ 500.000 em 220 meses → R$ 2.822,73; moto R$ 20.000 em
+60 meses → R$ 427,33; carro R$ 100.000 em 90 meses → R$ 1.291,11.
+
+| Zona | Regra (guarda por mês ÷ parcela de referência) | Exemplo |
+| --- | --- | --- |
+| Quente | 1 ou mais: cabe | Guarda R$ 10.000, precisa de R$ 100.000 (imóvel, 220 meses) |
+| Morna | de 0,75 a 0,99 | Guarda R$ 1.000, precisa de R$ 100.000 (carro, 90 meses): faltam R$ 292 |
+| Fria | abaixo de 0,75 | Guarda R$ 500, precisa de R$ 100.000 (carro, 90 meses) |
+
+Os limites ficam em `HEAT` (`src/config/simulators.ts`). O mesmo fator vale para todos os prazos
+(decisão provisória, a validar).
 
 ### Rastreamento
 
@@ -73,17 +90,19 @@ Eventos enviados para `window.dataLayer` (e `fbq`, se o Pixel estiver configurad
 | Evento | Quando | Meta Pixel |
 | --- | --- | --- |
 | `page_view` | carregamento (uma vez) | `PageView` |
-| `simulation_started` | 1ª interação com o simulador | `SimulationStarted` (custom) |
-| `simulation_completed` | resultado válido estável por 1,2 s ou clique em continuar (sem duplicar o mesmo valor) | `SimulationCompleted` (custom) |
-| `lead_form_submitted` | **somente** após resposta 2xx da API | `Lead` |
-| `whatsapp_clicked` | qualquer botão de WhatsApp (`location` indica qual) | `Contact` |
+| `lead_form_submitted` | **somente** após resposta 2xx da API ao envio da simulação | `Lead` |
+| `simulation_started` | 1ª interação com a simulação | `SimulationStarted` (custom) |
+| `simulation_completed` | clique em Simular com dados válidos (inclui `heat_zone`) | `SimulationCompleted` (custom) |
+| `result_viewed` | chegada na página de resultado (`heat_zone`) | `ViewContent` |
+| `scenario_adjusted` | ajuste no "E se…" (`via`: controle, prazo ou dica) | `ScenarioAdjusted` (custom) |
+| `whatsapp_clicked` | qualquer botão de WhatsApp (`location`, `heat_zone`, `adjusted`) | `Contact` |
 
-Nome e telefone **nunca** são enviados para GTM/Pixel. As UTMs (`utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`) e click IDs (`gclid`, `fbclid`…) ficam em `sessionStorage` e seguem junto com o cadastro.
-Use GTM **ou** Pixel direto — não os dois para o mesmo Pixel, para não duplicar eventos.
+Nome e telefone **nunca** são enviados para GTM/Pixel. As UTMs e click IDs ficam em `sessionStorage` e
+seguem junto com o cadastro. Use GTM **ou** Pixel direto, não os dois para o mesmo Pixel.
 
 ### Backend
 
-Contrato em [docs/api-contract.md](docs/api-contract.md) e tabela sugerida em [docs/schema.sql](docs/schema.sql).
+Contrato em [docs/api-contract.md](docs/api-contract.md) e tabelas sugeridas em [docs/schema.sql](docs/schema.sql).
 Nenhum dado pessoal é salvo no navegador.
 
 ## Capa de link (WhatsApp, Instagram, Facebook, X)
