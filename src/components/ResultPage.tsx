@@ -1,6 +1,6 @@
 import { MessageCircle, Phone, RotateCcw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { OBJECTIVES, REDUCED_NOTE, SIMULATION_DISCLAIMER } from '../config/simulators';
+import { OBJECTIVES, SIMULATION_DISCLAIMER } from '../config/simulators';
 import { SITE } from '../config/site';
 import { useAnimatedNumber } from '../hooks/useAnimatedNumber';
 import { getAttribution } from '../lib/attribution';
@@ -21,20 +21,14 @@ interface Props {
   onRestart: () => void;
 }
 
-const CONVERSATION_STEPS = [
-  'Você manda a mensagem, que já vai pronta com a sua simulação.',
-  'O especialista confere seus números e tira suas dúvidas.',
-  'Você vê as opções com calma e decide se quer seguir. Nada é contratado na conversa.',
-];
 
 export function ResultPage({ result, contact, honeypot, onRestart }: Props) {
-  const { quote: q, profile } = result;
+  const { quote: q } = result;
   const obj = OBJECTIVES[q.objective];
-  const reduced = q.reducedCents !== null;
   const main = headlineCents(q);
   const first = contact?.name;
 
-  // Contagem animada da parcela (em centavos, arredondada a cada quadro).
+  // Contagem animada do valor mensal (em centavos, arredondada a cada quadro).
   const shown = useAnimatedNumber(Number(main), { duration: 1400 });
   const parts = splitCents(BigInt(Math.round(shown)));
 
@@ -60,21 +54,6 @@ export function ResultPage({ result, contact, honeypot, onRestart }: Props) {
   const href = whatsappUrl(resultMessage(result, contact));
   const phone = whatsappDisplay();
 
-  const details: { label: string; value: string }[] = [
-    { label: `Valor do ${obj.noun}`, value: `R$ ${formatReais(q.valueReais)}` },
-    { label: 'Prazo', value: `${q.termMonths} meses` },
-    ...(q.reducedCents !== null
-      ? [
-          { label: `Parcela reduzida (${q.reducedPercent}%)`, value: formatCents(q.reducedCents) },
-          { label: 'Parcela cheia', value: formatCents(q.fullCents) },
-        ]
-      : [{ label: 'Parcela', value: formatCents(q.fullCents) }]),
-    { label: 'Renda mensal', value: `R$ ${formatReais(profile.incomeReais)}` },
-    {
-      label: 'Dinheiro guardado',
-      value: profile.hasSavings && profile.savingsReais ? `R$ ${formatReais(profile.savingsReais)}` : 'Não possui',
-    },
-  ];
 
   return (
     <section
@@ -84,22 +63,23 @@ export function ResultPage({ result, contact, honeypot, onRestart }: Props) {
     >
       {/* Mesmo fundo do formulário, fixo enquanto a página rola (o clip-path recorta o fixed à seção) */}
       <div aria-hidden="true" className="absolute inset-0 -z-20 [clip-path:inset(0)]">
-        <div className="fixed inset-0">
+        <div className="fixed inset-x-0 top-0 h-[100lvh]">
           <SceneBackground objective={q.objective} />
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(21_21_21/0.8)_0%,rgb(21_21_21/0.66)_40%,rgb(21_21_21/0.9)_100%)] lg:bg-[linear-gradient(90deg,rgb(21_21_21/0.92)_0%,rgb(21_21_21/0.72)_55%,rgb(21_21_21/0.5)_100%)]" />
         </div>
       </div>
 
-      <div className="relative z-[2] mx-auto grid max-w-[90rem] grid-cols-1 gap-x-12 gap-y-10 px-5 md:px-10 lg:grid-cols-12">
-        {/* A. A parcela em destaque */}
-        <div className="lg:col-span-7">
-          <p className="text-sm font-semibold text-offwhite/65">{first ? `${first}, esta é a sua parcela` : 'Esta é a sua parcela'}</p>
-          <p className="mt-4 inline-flex rounded-full bg-champagne/15 px-3 py-1 text-[0.8rem] font-semibold text-champagne">
-            {reduced ? `Parcela reduzida ${q.reducedPercent}%` : 'Parcela mensal'}
+      {/* Só o valor e o convite para conversar: a atenção vai para o número e o botão. */}
+      <div className="relative z-[2] mx-auto grid max-w-[90rem] grid-cols-1 gap-x-12 gap-y-10 px-5 md:px-10 lg:min-h-[calc(100svh-12rem)] lg:grid-cols-12 lg:content-center">
+        {/* A. O investimento mensal em destaque */}
+        <div className="lg:col-span-7 lg:self-end">
+          <p className="text-sm font-semibold text-offwhite/80 [text-shadow:0_1px_12px_rgb(21_21_21/0.8)]">{first ? `${first}, este é o seu resultado` : 'Este é o seu resultado'}</p>
+          <p className="mt-5 inline-flex rounded-full bg-champagne px-3.5 py-1.5 text-[0.85rem] font-semibold text-charcoal shadow-[0_8px_24px_-8px_rgb(0_0_0/0.6)]">
+            Investimento mensal de apenas
           </p>
-          <p aria-hidden="true" className="tabular mt-3 flex flex-wrap items-baseline gap-x-2 text-champagne">
+          <p aria-hidden="true" className="tabular mt-3 flex flex-wrap items-baseline gap-x-2 text-champagne [text-shadow:0_2px_28px_rgb(21_21_21/0.75)]">
             <span className="font-display text-[clamp(1.4rem,5vw,2.2rem)] font-semibold">R$</span>
-            <span className="display text-[clamp(3.4rem,16vw,9rem)] leading-none">
+            <span className="display text-[clamp(3.6rem,17vw,9.5rem)] leading-none">
               {parts.int}
               <span className="text-[0.5em]">,{parts.frac}</span>
             </span>
@@ -108,97 +88,49 @@ export function ResultPage({ result, contact, honeypot, onRestart }: Props) {
           <h1
             id="resultado-title"
             tabIndex={-1}
-            className="mt-4 max-w-xl font-display text-[clamp(1.35rem,3.6vw,2.1rem)] font-semibold leading-[1.15] tracking-[-0.025em] text-offwhite outline-none"
+            className="mt-4 max-w-xl font-display text-[clamp(1.35rem,3.6vw,2.1rem)] font-semibold leading-[1.15] tracking-[-0.025em] text-offwhite outline-none [text-shadow:0_2px_24px_rgb(21_21_21/0.75)]"
           >
-            <span className="sr-only">Parcela de {formatCents(main)} por mês. </span>
-            Para o seu {obj.noun} de <span className="whitespace-nowrap">R$ {formatReais(q.valueReais)}</span>, em{' '}
-            {q.termMonths} meses.
+            <span className="sr-only">Investimento mensal de apenas {formatCents(main)}, </span>
+            para conquistar o seu {obj.noun} de <span className="whitespace-nowrap">R$ {formatReais(q.valueReais)}</span>.
           </h1>
-          {q.reducedCents !== null && (
-            <p className="mt-4 max-w-xl text-[1rem] leading-relaxed text-offwhite/75">
-              Você começa pagando menos: em vez de <span className="whitespace-nowrap">{formatCents(q.fullCents)}</span>, a
-              parcela fica em <strong className="whitespace-nowrap font-semibold text-offwhite">{formatCents(q.reducedCents)}</strong>{' '}
-              por mês.
-            </p>
-          )}
         </div>
 
         {/* B. Conversa em destaque */}
-        <div ref={mainCta} className="lg:col-span-5 lg:col-start-8 lg:row-span-3 lg:row-start-1">
-          <div className="lg:sticky lg:top-28">
-            <div className="relative overflow-hidden rounded-xl bg-graphite p-6 shadow-[inset_0_0_0_1.5px_#d9a66f,0_30px_80px_-30px_rgb(217_166_111/0.7)] sm:p-8">
-              <p className="text-sm font-semibold text-champagne">Próximo passo</p>
-              <h2 className="mt-2 font-display text-[clamp(1.5rem,4vw,2rem)] font-semibold leading-tight tracking-[-0.025em] text-offwhite">
-                Quer saber como fazer esse investimento?
-              </h2>
-              <p className="mt-3 leading-relaxed text-offwhite/70">
-                Fale direto com o especialista pelo WhatsApp. Sua simulação já vai na mensagem.
-              </p>
-              <ButtonLink
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                icon={MessageCircle}
-                fullWidth
-                className="mt-6 !min-h-16 !text-[1.05rem]"
-                onClick={() => onTalk('result_card')}
+        <div ref={mainCta} className="lg:col-span-5 lg:col-start-8 lg:row-span-2 lg:row-start-1 lg:self-center">
+          <div className="relative overflow-hidden rounded-xl bg-graphite p-6 shadow-[inset_0_0_0_1.5px_#d9a66f,0_30px_80px_-30px_rgb(217_166_111/0.7)] sm:p-8">
+            <p className="text-sm font-semibold text-champagne">Próximo passo</p>
+            <h2 className="mt-2 font-display text-[clamp(1.5rem,4vw,2rem)] font-semibold leading-tight tracking-[-0.025em] text-offwhite">
+              Quer saber como fazer esse investimento?
+            </h2>
+            <p className="mt-3 leading-relaxed text-offwhite/70">
+              Fale agora com o especialista pelo WhatsApp. Sua simulação já vai na mensagem.
+            </p>
+            <ButtonLink
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              icon={MessageCircle}
+              fullWidth
+              className="mt-6 !min-h-16 !text-[1.05rem]"
+              onClick={() => onTalk('result_card')}
+            >
+              Falar no WhatsApp
+            </ButtonLink>
+            {phone && (
+              <a
+                href={`tel:+${SITE.whatsappNumber}`}
+                onClick={() => track('whatsapp_clicked', { location: 'result_phone', objective: q.objective })}
+                className="mt-3 flex min-h-11 items-center justify-center gap-2 text-sm text-offwhite/65 hover:text-offwhite"
               >
-                Falar no WhatsApp
-              </ButtonLink>
-              {phone && (
-                <a
-                  href={`tel:+${SITE.whatsappNumber}`}
-                  onClick={() => track('whatsapp_clicked', { location: 'result_phone', objective: q.objective })}
-                  className="mt-3 flex min-h-11 items-center justify-center gap-2 text-sm text-offwhite/65 hover:text-offwhite"
-                >
-                  <Phone aria-hidden="true" className="size-4" />
-                  Ou ligue: <span className="tabular font-semibold text-offwhite">{phone}</span>
-                </a>
-              )}
-
-              <div className="mt-5 border-t border-offwhite/10 pt-5">
-                <p className="text-sm font-semibold text-offwhite/85">Como é a conversa</p>
-                <ol className="mt-3 space-y-3">
-                  {CONVERSATION_STEPS.map((step, i) => (
-                    <li key={step} className="flex gap-3 text-[0.9rem] leading-relaxed text-offwhite/70">
-                      <span
-                        aria-hidden="true"
-                        className="tabular grid size-6 shrink-0 place-items-center rounded-full bg-champagne text-xs font-semibold text-charcoal"
-                      >
-                        {i + 1}
-                      </span>
-                      <span>{step}</span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* C. Resumo da simulação */}
-        <div className="lg:col-span-7">
-          <div className="rounded-xl bg-charcoal/65 p-5 shadow-[inset_0_0_0_1px_rgb(243_240_234/0.1)] backdrop-blur-md sm:p-7">
-            <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-offwhite">Sua simulação</h2>
-            <dl className="mt-4 divide-y divide-offwhite/10">
-              {details.map((d) => (
-                <div key={d.label} className="flex items-baseline justify-between gap-4 py-3">
-                  <dt className="text-[0.92rem] text-offwhite/60">{d.label}</dt>
-                  <dd className="tabular text-right font-semibold text-offwhite">{d.value}</dd>
-                </div>
-              ))}
-            </dl>
-            {reduced && (
-              <div className="mt-5 rounded-md bg-offwhite/[0.05] p-4">
-                <p className="text-sm font-semibold text-offwhite/85">O que é a parcela reduzida?</p>
-                <p className="mt-1.5 text-[0.88rem] leading-relaxed text-offwhite/65">{REDUCED_NOTE}</p>
-              </div>
+                <Phone aria-hidden="true" className="size-4" />
+                Ou ligue: <span className="tabular font-semibold text-offwhite">{phone}</span>
+              </a>
             )}
           </div>
         </div>
 
-        {/* D. Refazer e aviso */}
-        <div className="lg:col-span-7">
+        {/* C. Refazer e aviso */}
+        <div className="lg:col-span-7 lg:self-start">
           <button
             type="button"
             onClick={onRestart}

@@ -242,3 +242,13 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Fundo (SceneBackground): a foto ativa entra com fade */
+@keyframes scene-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

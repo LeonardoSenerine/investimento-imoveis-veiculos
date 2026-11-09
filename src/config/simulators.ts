@@ -51,9 +51,9 @@ export const RULES: Record<RuleId, Rule> = {
 /** A partir deste valor (inclusive), o veículo usa a parcela reduzida de 50%. */
 export const VEHICLE_REDUCED_FROM = 30_000;
 
+/**
+ * Aviso no rodapé do resultado. A pedido do cliente o site não fala em parcela
+ * cheia/reduzida; o aviso mantém, de forma neutra, que o valor mensal pode variar.
+ */
 export const SIMULATION_DISCLAIMER =
-  'Simulação ilustrativa. Valores, prazos e a forma de liberação do crédito são apresentados no atendimento, antes de qualquer contratação.';
-
-/** Explica a parcela reduzida sem esconder que ela muda depois da liberação. */
-export const REDUCED_NOTE =
-  'A parcela reduzida vale até a liberação do crédito. Depois, o valor restante é distribuído nas parcelas seguintes. Tudo é explicado no atendimento.';
+  'Simulação ilustrativa. O valor mensal pode variar ao longo do plano. Valores, prazos e a forma de liberação do crédito são apresentados no atendimento, antes de qualquer contratação.';

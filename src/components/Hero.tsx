@@ -19,13 +19,20 @@ export function Hero({ draft, onChange, onSubmit }: Props) {
   useMotion(root, ({ desktop }, el) => {
     const header = document.querySelector('[data-site-header]');
     const intro = gsap.timeline({ defaults: { ease: 'expo.out' } });
-    intro
-      .fromTo(
-        el.querySelector('[data-hero-frame]'),
-        { clipPath: desktop ? 'inset(14% 18% 14% 18%)' : 'inset(10% 6% 30% 6%)' },
+    const frame = el.querySelector('[data-hero-frame]');
+    // Desktop: a foto abre por clip-path. Celular: só um fade (a moldura cobre a
+    // seção inteira, que é alta; recortar por porcentagem parecia um "bug").
+    if (desktop) {
+      intro.fromTo(
+        frame,
+        { clipPath: 'inset(14% 18% 14% 18%)' },
         { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.5, ease: 'expo.inOut' },
-      )
-      .fromTo(el.querySelector('[data-scene]'), { scale: 1.3 }, { scale: 1, duration: 2.2 }, 0)
+      );
+    } else {
+      intro.from(frame, { opacity: 0, duration: 1, ease: 'power2.out' });
+    }
+    intro
+      .fromTo(el.querySelector('[data-scene]'), { scale: desktop ? 1.3 : 1.08 }, { scale: 1, duration: desktop ? 2.2 : 1.6 }, 0)
       .from(el.querySelectorAll('[data-hero-title] .line-inner'), { yPercent: 112, duration: 1.1, stagger: 0.08 }, 0.5)
       // O formulário aparece rápido: ninguém deve esperar animação para preencher.
       .from(el.querySelector('[data-hero-card]'), { y: 24, opacity: 0, duration: 0.9 }, 0.35)
@@ -39,7 +46,8 @@ export function Hero({ draft, onChange, onSubmit }: Props) {
     <section ref={root} id="inicio" aria-labelledby="hero-title" className="grain relative isolate overflow-hidden bg-charcoal">
       {/* Foto fixa na tela enquanto o formulário rola; o clip-path da moldura recorta o fixed à seção. */}
       <div data-hero-frame className="absolute inset-0 -z-10 overflow-hidden [clip-path:inset(0)]">
-        <div className="fixed inset-0">
+        {/* Altura fixa em lvh: não muda quando a barra do navegador do celular aparece/some. */}
+        <div className="fixed inset-x-0 top-0 h-[100lvh]">
           <SceneBackground objective={draft.objective} priority />
           <div
             aria-hidden="true"
@@ -59,14 +67,14 @@ export function Hero({ draft, onChange, onSubmit }: Props) {
             <Lines lines={[`Seu ${noun}`, 'cabe no', 'seu mês?']} lineClassName={(i) => (i === 1 ? 'pl-[10%]' : '')} />
           </h1>
           <p data-hero-fade className="mt-4 max-w-md text-[1rem] leading-relaxed text-offwhite/75 md:mt-6 md:text-lg">
-            Preencha os dados e veja na hora quanto fica a parcela do seu {noun}.
+            Preencha os dados e veja na hora o investimento mensal para o seu {noun}.
           </p>
         </div>
 
         <div className="lg:col-span-6 xl:col-span-5">
           <div
             data-hero-card
-            className="grain relative overflow-hidden rounded-lg bg-graphite/80 p-5 text-offwhite shadow-[0_40px_90px_-40px_rgb(0_0_0/0.9)] backdrop-blur-xl sm:p-7 lg:bg-graphite/90"
+            className="grain relative overflow-hidden rounded-lg bg-graphite/[0.94] p-5 text-offwhite shadow-[0_40px_90px_-40px_rgb(0_0_0/0.9)] sm:p-7 lg:bg-graphite/90 lg:backdrop-blur-xl"
           >
             <span
               aria-hidden="true"

@@ -61,8 +61,9 @@ Duas páginas: o formulário (`/`) e o resultado (`/resultado`). O `vercel.json`
    muda: "Seu imóvel cabe no seu mês?" / "Seu veículo cabe no seu mês?".
 3. Ao confirmar, o lead é enviado uma única vez; o resultado abre assim que a API confirma, ou em no
    máximo 4 s. Uma cortina cobre a tela com o objetivo e se abre na página de resultado.
-4. **Página de resultado**: a parcela em destaque (reduzida quando a regra tem), o resumo da simulação,
-   o que é a parcela reduzida e o contato do consultor (WhatsApp com a simulação na mensagem e telefone).
+4. **Página de resultado**: "Investimento mensal de apenas R$ …" em destaque (o valor reduzido quando a
+   regra tem). A pedido do cliente, o site e a mensagem do WhatsApp não mostram a parcela cheia nem usam
+   a palavra "parcela"; o aviso do rodapé diz que o valor mensal pode variar ao longo do plano. Também traz o resumo e o contato do consultor (WhatsApp com a simulação na mensagem e telefone).
    No celular, o botão do WhatsApp fica fixo no rodapé ao rolar.
 
 ### Cálculo (regras do cliente)

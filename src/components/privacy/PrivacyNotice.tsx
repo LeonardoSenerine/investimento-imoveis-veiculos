@@ -62,7 +62,7 @@ export const PrivacyNotice = forwardRef<HTMLDialogElement>(function PrivacyNotic
           <Block title="Quais dados coletamos">
             <p>
               Primeiro nome e número de celular informados por você; os dados da simulação (objetivo, valor do
-              imóvel ou veículo, renda mensal, se possui dinheiro guardado e quanto, parcelas calculadas e data); e a
+              imóvel ou veículo, renda mensal, se possui dinheiro guardado e quanto, valores mensais calculados e data); e a
               origem da visita (parâmetros de campanha como utm_source, página de entrada e referência).
             </p>
             <p>

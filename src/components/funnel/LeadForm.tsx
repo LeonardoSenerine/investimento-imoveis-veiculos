@@ -108,7 +108,7 @@ export function LeadForm({ draft, onChange, onSubmit }: Props) {
   return (
     <form noValidate onSubmit={handleSubmit} className="flex flex-col">
       <h2 className="font-display text-[1.45rem] font-semibold leading-tight tracking-[-0.02em]">Simule em menos de um minuto</h2>
-      <p className="mt-2 text-[0.95rem] leading-relaxed text-offwhite/60">Veja na hora a parcela para o seu {obj.noun}.</p>
+      <p className="mt-2 text-[0.95rem] leading-relaxed text-offwhite/60">Veja na hora o investimento mensal para o seu {obj.noun}.</p>
 
       <div className="mt-6 space-y-5">
         <ChoiceGroup

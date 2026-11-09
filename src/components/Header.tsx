@@ -11,7 +11,7 @@ export function Header() {
       data-site-header
       className={cn(
         'fixed inset-x-0 top-0 z-40 transition-[background-color,backdrop-filter] duration-700',
-        scrolled ? 'bg-charcoal/85 backdrop-blur-xl' : 'bg-transparent',
+        scrolled ? 'bg-charcoal/95 lg:bg-charcoal/85 lg:backdrop-blur-xl' : 'bg-transparent',
       )}
     >
       <div className="mx-auto flex h-16 max-w-[90rem] items-center px-5 md:h-20 md:px-10">
