@@ -24,7 +24,7 @@ export function resultMessage(r: SimulationResult, contact?: Contact | null): st
     contact ? `Olá! Meu nome é ${contact.name}.` : 'Olá!',
     'Fiz a simulação no site:',
     `${noun.charAt(0).toUpperCase()}${noun.slice(1)} de R$ ${formatReais(q.valueReais)}`,
-    `Investimento mensal: ${formatCents(q.reducedCents ?? q.fullCents)} (${q.termMonths} meses)`,
+    `Investimento mensal: ${formatCents(q.reducedCents ?? q.fullCents)}`,
     `Renda mensal: R$ ${formatReais(profile.incomeReais)}`,
     profile.hasSavings && profile.savingsReais
       ? `Dinheiro guardado: R$ ${formatReais(profile.savingsReais)}`
