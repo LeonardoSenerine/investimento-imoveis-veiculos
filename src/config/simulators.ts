@@ -1,97 +1,59 @@
 /**
- * CONFIGURAÇÃO DA SIMULAÇÃO
- * ---------------------------------------------------------------------------
- * ATENÇÃO: os fatores e prazos abaixo são PARÂMETROS PRELIMINARES fornecidos
- * pelo cliente e ainda precisam de validação comercial e documental.
+ * Regras de cálculo informadas pelo cliente (mensagem de 09/11/2026).
  *
- * Fórmula:
- *   parcela de referência = (crédito × fator) ÷ prazo
+ * Parcela cheia     = (valor × fator) ÷ prazo
+ * Parcela reduzida  = (valor ÷ prazo) × percentual  +  (valor × (fator − 1)) ÷ prazo
  *
- * A pessoa informa quanto consegue guardar por mês, de quanto crédito precisa
- * e o prazo. Comparando o valor mensal com a parcela de referência, o site diz
- * se o planejamento cabe e em qual "zona de calor" ela está.
+ * A taxa de administração (fator − 1) não é reduzida: entra inteira nas duas.
+ * Cada parte é arredondada para centavos antes da soma, como no exemplo do
+ * cliente (636,36 + 218,18 = 854,54).
  *
- * - `factor` é string para preservar a precisão decimal (nunca usar float).
- * - O mesmo fator vale para todos os prazos (decisão provisória).
- * - Nenhum número de regra deve ser fixado fora deste arquivo.
+ *  - Imóvel: fator 1,24, 220 meses, parcela reduzida 70%.
+ *  - Veículo a partir de R$ 30 mil: fator 1,162, 90 meses, parcela reduzida 50%.
+ *  - Veículo abaixo de R$ 30 mil: fator 1,282, 60 meses, somente parcela cheia.
  */
 
-export type PlanId = 'imovel' | 'automovel' | 'moto';
-export type Category = 'property' | 'vehicle';
+export type Objective = 'imovel' | 'veiculo';
+export type RuleId = 'imovel' | 'veiculo' | 'veiculo_ate_30k';
 
-export interface CreditRange {
-  /** Valores em reais inteiros. */
-  min: number;
-  max: number;
-  /** Arredondamento das sugestões de crédito. */
-  step: number;
-}
-
-export interface PlanConfig {
-  id: PlanId;
-  category: Category;
+export interface ObjectiveConfig {
+  id: Objective;
+  /** Rótulo do botão de escolha. */
   label: string;
-  /** Usado em frases: "planejar seu imóvel", "planejar sua moto". */
+  /** Usado nas frases: "o valor do imóvel", "um veículo". */
   noun: string;
-  /** Gênero do substantivo, para concordância ("seu carro", "sua moto"). */
-  feminine: boolean;
-  factor: string;
-  /** Prazo padrão (o prazo para o qual o cliente informou o fator). */
-  termMonths: number;
-  termOptions: number[];
-  credit: CreditRange;
+  /** Faixa de valores aceita pelo simulador, em reais. */
+  value: { min: number; max: number };
 }
 
-export const PLANS: Record<PlanId, PlanConfig> = {
-  imovel: {
-    id: 'imovel',
-    category: 'property',
-    label: 'Imóvel',
-    noun: 'imóvel',
-    feminine: false,
-    factor: '1.242',
-    termMonths: 220,
-    termOptions: [120, 150, 180, 200, 220, 240],
-    credit: { min: 100_000, max: 2_000_000, step: 5_000 },
-  },
-  automovel: {
-    id: 'automovel',
-    category: 'vehicle',
-    label: 'Carro',
-    noun: 'carro',
-    feminine: false,
-    factor: '1.162',
-    termMonths: 90,
-    termOptions: [36, 48, 60, 72, 80, 90, 100],
-    credit: { min: 35_000, max: 400_000, step: 1_000 },
-  },
-  moto: {
-    id: 'moto',
-    category: 'vehicle',
-    label: 'Moto',
-    noun: 'moto',
-    feminine: true,
-    factor: '1.282',
-    termMonths: 60,
-    termOptions: [24, 36, 48, 60, 72],
-    credit: { min: 8_000, max: 30_000, step: 500 },
-  },
+export const OBJECTIVES: Record<Objective, ObjectiveConfig> = {
+  imovel: { id: 'imovel', label: 'Imóvel', noun: 'imóvel', value: { min: 50_000, max: 10_000_000 } },
+  veiculo: { id: 'veiculo', label: 'Veículo', noun: 'veículo', value: { min: 5_000, max: 1_000_000 } },
 };
 
-export const PLAN_ORDER: PlanId[] = ['imovel', 'automovel', 'moto'];
+export const OBJECTIVE_ORDER: Objective[] = ['imovel', 'veiculo'];
 
-/**
- * Faixa entre motos e carros sem regra validada.
- * Valores estritamente entre `from` e `to` não são calculados.
- */
-export const UNVALIDATED_VEHICLE_RANGE = { from: 30_000, to: 35_000 } as const;
+export interface Rule {
+  id: RuleId;
+  /** Fator com a taxa de administração embutida, como string decimal ("1.24"). */
+  factor: string;
+  termMonths: number;
+  /** Percentual da parcela reduzida ("0.70"); null quando só existe parcela cheia. */
+  reducedShare: string | null;
+}
 
-/**
- * Zona de calor: razão entre o que a pessoa guarda por mês e a parcela de
- * referência. A partir de `hot` o planejamento cabe; entre `warm` e `hot` ela
- * está perto; abaixo de `warm`, ainda não fecha.
- */
-export const HEAT = { warm: 0.75, hot: 1 } as const;
+export const RULES: Record<RuleId, Rule> = {
+  imovel: { id: 'imovel', factor: '1.24', termMonths: 220, reducedShare: '0.70' },
+  veiculo: { id: 'veiculo', factor: '1.162', termMonths: 90, reducedShare: '0.50' },
+  veiculo_ate_30k: { id: 'veiculo_ate_30k', factor: '1.282', termMonths: 60, reducedShare: null },
+};
+
+/** A partir deste valor (inclusive), o veículo usa a parcela reduzida de 50%. */
+export const VEHICLE_REDUCED_FROM = 30_000;
 
 export const SIMULATION_DISCLAIMER =
   'Simulação ilustrativa. Valores, prazos e a forma de liberação do crédito são apresentados no atendimento, antes de qualquer contratação.';
+
+/** Explica a parcela reduzida sem esconder que ela muda depois da liberação. */
+export const REDUCED_NOTE =
+  'A parcela reduzida vale até a liberação do crédito. Depois, o valor restante é distribuído nas parcelas seguintes. Tudo é explicado no atendimento.';

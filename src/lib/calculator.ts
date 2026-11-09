@@ -1,55 +1,56 @@
-import { PLANS, UNVALIDATED_VEHICLE_RANGE, type PlanConfig, type PlanId } from '../config/simulators';
+import { OBJECTIVES, RULES, VEHICLE_REDUCED_FROM, type Objective, type Rule } from '../config/simulators';
 import { divRoundHalfUp, parseDecimal, reaisToCents } from './money';
 
-/** Prazo válido para o plano: se não for uma das opções, usa o padrão. */
-export const resolveTerm = (plan: PlanConfig, term?: number) =>
-  term !== undefined && plan.termOptions.includes(term) ? term : plan.termMonths;
-
-/** Parcela de referência = (crédito × fator) ÷ prazo, em centavos, arredondamento half-up. */
-export function estimateInstallmentCents(plan: PlanConfig, creditReais: number, term?: number): bigint {
-  const credit = reaisToCents(creditReais);
-  const { units, scale } = parseDecimal(plan.factor);
-  return divRoundHalfUp(credit * units, scale * BigInt(resolveTerm(plan, term)));
+export interface Quote {
+  objective: Objective;
+  valueReais: number;
+  rule: Rule;
+  termMonths: number;
+  /** Parcela cheia, em centavos. */
+  fullCents: bigint;
+  /** Parcela reduzida, em centavos (null quando a regra não tem). */
+  reducedCents: bigint | null;
+  /** 70, 50 ou null. */
+  reducedPercent: number | null;
 }
 
-const floorTo = (value: number, step: number) => Math.floor(value / step) * step;
-
-/**
- * Crédito que cabe num valor mensal, pela fórmula inversa:
- *   crédito = (mensal × prazo) ÷ fator
- * Arredondado PARA BAIXO até o passo do plano (estimativa conservadora).
- */
-export function estimateCreditFromMonthly(plan: PlanConfig, monthlyReais: number, term?: number): number {
-  const monthlyCents = reaisToCents(monthlyReais);
-  const { units, scale } = parseDecimal(plan.factor);
-  const creditCents = (monthlyCents * BigInt(resolveTerm(plan, term)) * scale) / units; // divisão inteira = piso
-  return floorTo(Number(creditCents / 100n), plan.credit.step);
+/** Regra aplicada ao objetivo e valor. */
+export function ruleFor(objective: Objective, valueReais: number): Rule {
+  if (objective === 'imovel') return RULES.imovel;
+  return valueReais >= VEHICLE_REDUCED_FROM ? RULES.veiculo : RULES.veiculo_ate_30k;
 }
 
-export type CreditCheck =
-  | { ok: true }
-  | { ok: false; reason: 'empty' | 'below_min' | 'above_max' | 'unvalidated'; suggestedPlanId?: PlanId };
+/** Calcula as parcelas pela regra do cliente (centavos exatos, half-up). */
+export function quote(objective: Objective, valueReais: number): Quote {
+  const rule = ruleFor(objective, valueReais);
+  const value = reaisToCents(valueReais);
+  const term = BigInt(rule.termMonths);
+  const factor = parseDecimal(rule.factor);
 
-/** Valida se o crédito pedido está na faixa que o simulador calcula para o plano. */
-export function checkCredit(planId: PlanId, creditReais: number | null): CreditCheck {
-  const plan = PLANS[planId];
-  if (creditReais === null || creditReais <= 0) return { ok: false, reason: 'empty' };
-  if (
-    plan.category === 'vehicle' &&
-    creditReais > UNVALIDATED_VEHICLE_RANGE.from &&
-    creditReais < UNVALIDATED_VEHICLE_RANGE.to
-  ) {
-    return { ok: false, reason: 'unvalidated' };
+  const fullCents = divRoundHalfUp(value * factor.units, factor.scale * term);
+
+  let reducedCents: bigint | null = null;
+  let reducedPercent: number | null = null;
+  if (rule.reducedShare) {
+    const share = parseDecimal(rule.reducedShare);
+    const base = divRoundHalfUp(value * share.units, share.scale * term);
+    const fee = divRoundHalfUp(value * (factor.units - factor.scale), factor.scale * term);
+    reducedCents = base + fee;
+    reducedPercent = Math.round((Number(share.units) / Number(share.scale)) * 100);
   }
-  if (creditReais < plan.credit.min || creditReais > plan.credit.max) {
-    const suggested = (Object.values(PLANS) as PlanConfig[]).find(
-      (p) => p.category === plan.category && p.id !== plan.id && creditReais >= p.credit.min && creditReais <= p.credit.max,
-    );
-    return {
-      ok: false,
-      reason: creditReais < plan.credit.min ? 'below_min' : 'above_max',
-      suggestedPlanId: suggested?.id,
-    };
-  }
+
+  return { objective, valueReais, rule, termMonths: rule.termMonths, fullCents, reducedCents, reducedPercent };
+}
+
+/** Parcela que aparece em destaque: a reduzida quando existe. */
+export const headlineCents = (q: Quote) => q.reducedCents ?? q.fullCents;
+
+export type ValueCheck = { ok: true } | { ok: false; reason: 'empty' | 'below_min' | 'above_max' };
+
+export function checkValue(objective: Objective, valueReais: number | null): ValueCheck {
+  const { min, max } = OBJECTIVES[objective].value;
+  if (valueReais === null || valueReais <= 0) return { ok: false, reason: 'empty' };
+  if (valueReais < min) return { ok: false, reason: 'below_min' };
+  if (valueReais > max) return { ok: false, reason: 'above_max' };
   return { ok: true };
 }

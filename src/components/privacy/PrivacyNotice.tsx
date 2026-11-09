@@ -61,13 +61,13 @@ export const PrivacyNotice = forwardRef<HTMLDialogElement>(function PrivacyNotic
           </Block>
           <Block title="Quais dados coletamos">
             <p>
-              Nome e número de celular informados por você; os dados da simulação (objetivo, quanto você guarda por
-              mês, crédito, prazo, resultado e data); e a origem da visita (parâmetros de campanha como utm_source,
-              página de entrada e referência).
+              Primeiro nome e número de celular informados por você; os dados da simulação (objetivo, valor do
+              imóvel ou veículo, renda mensal, se possui dinheiro guardado e quanto, parcelas calculadas e data); e a
+              origem da visita (parâmetros de campanha como utm_source, página de entrada e referência).
             </p>
             <p>
               Quando ativas, ferramentas de medição (Google Tag Manager e Meta Pixel) podem registrar dados de
-              navegação de forma agregada. Seu nome e telefone não são enviados a essas ferramentas.
+              navegação de forma agregada. Seu nome, telefone, renda e valores não são enviados a essas ferramentas.
             </p>
           </Block>
           <Block title="Para que usamos">

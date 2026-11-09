@@ -13,12 +13,13 @@ export const SITE = {
    */
   descriptor: 'Chave',
   descriptorDetail: 'Planejamento de conquistas',
-  whatsappNumber: digits(env.VITE_WHATSAPP_NUMBER),
+  /** WhatsApp do consultor (pode ser trocado por VITE_WHATSAPP_NUMBER). */
+  whatsappNumber: digits(env.VITE_WHATSAPP_NUMBER) || '5511963329968',
   leadApiUrl: (env.VITE_LEAD_API_URL ?? '').trim(),
   gtmId: (env.VITE_GTM_ID ?? '').trim(),
   metaPixelId: digits(env.VITE_META_PIXEL_ID),
   privacyEmail: (env.VITE_PRIVACY_EMAIL ?? '').trim(),
-  privacyNoticeVersion: '2026-11-06',
+  privacyNoticeVersion: '2026-11-09',
   defaultWhatsAppMessage:
     'Olá! Vim pelo site e quero planejar a compra de um imóvel ou veículo.',
 } as const;

@@ -1,7 +1,8 @@
-import type { Feasibility } from './lib/feasibility';
+import type { Quote } from './lib/calculator';
 
-/** Contato informado no segundo passo, junto com a simulação. */
+/** Contato informado no formulário. */
 export interface Contact {
+  /** Primeiro nome. */
   name: string;
   /** E.164 sem "+", ex.: 5511912345678 */
   whatsapp: string;
@@ -11,10 +12,19 @@ export interface Contact {
   synced?: boolean;
 }
 
-/** Resultado de uma simulação, com identificador para reanimar a zona de calor. */
+/** Situação financeira informada pela pessoa. */
+export interface Profile {
+  incomeReais: number;
+  hasSavings: boolean;
+  /** Quanto tem guardado (só quando hasSavings). */
+  savingsReais: number | null;
+}
+
+/** Resultado de uma simulação. */
 export interface SimulationResult {
   id: number;
-  feasibility: Feasibility;
+  quote: Quote;
+  profile: Profile;
   /** ISO 8601 do momento da simulação. */
   simulatedAt: string;
 }

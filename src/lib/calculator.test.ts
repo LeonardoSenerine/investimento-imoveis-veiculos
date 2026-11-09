@@ -1,96 +1,58 @@
 import { describe, expect, it } from 'vitest';
-import { PLANS } from '../config/simulators';
-import { checkCredit, estimateCreditFromMonthly, estimateInstallmentCents } from './calculator';
-import { evaluate } from './feasibility';
-import { formatCents, parseReaisInput } from './money';
+import { checkValue, headlineCents, quote, ruleFor } from './calculator';
+import { formatCents } from './money';
 
-const installment = (planId: keyof typeof PLANS, credit: number, term?: number) =>
-  formatCents(estimateInstallmentCents(PLANS[planId], credit, term));
+const brl = (cents: bigint | null) => (cents === null ? null : formatCents(cents));
 
-describe('fórmulas preliminares do cliente', () => {
-  it('imóvel: R$ 500.000 em 220 meses → R$ 2.822,73', () => {
-    expect(installment('imovel', 500_000)).toBe('R$ 2.822,73');
+describe('exemplos do cliente', () => {
+  it('imóvel R$ 200.000: cheia R$ 1.127,27 e reduzida 70% R$ 854,54 em 220 meses', () => {
+    const q = quote('imovel', 200_000);
+    expect(q.termMonths).toBe(220);
+    expect(brl(q.fullCents)).toBe('R$ 1.127,27');
+    expect(brl(q.reducedCents)).toBe('R$ 854,54');
+    expect(q.reducedPercent).toBe(70);
   });
-  it('moto: R$ 20.000 em 60 meses → R$ 427,33', () => {
-    expect(installment('moto', 20_000)).toBe('R$ 427,33');
+
+  it('veículo R$ 40.000: cheia R$ 516,44 e reduzida 50% R$ 294,22 em 90 meses', () => {
+    const q = quote('veiculo', 40_000);
+    expect(q.termMonths).toBe(90);
+    expect(brl(q.fullCents)).toBe('R$ 516,44');
+    expect(brl(q.reducedCents)).toBe('R$ 294,22');
+    expect(q.reducedPercent).toBe(50);
   });
-  it('carro: R$ 100.000 em 90 meses → R$ 1.291,11', () => {
-    expect(installment('automovel', 100_000)).toBe('R$ 1.291,11');
-  });
-  it('arredonda ao centavo mais próximo (half-up)', () => {
-    expect(installment('automovel', 35_000)).toBe('R$ 451,89');
-  });
-  it('prazo fora das opções volta ao padrão', () => {
-    expect(installment('imovel', 500_000, 999)).toBe('R$ 2.822,73');
-  });
-  it('fórmula inversa arredonda o crédito para baixo', () => {
-    expect(estimateCreditFromMonthly(PLANS.automovel, 1_000, 90)).toBe(77_000);
+
+  it('veículo R$ 20.000: somente parcela cheia, R$ 427,33 em 60 meses', () => {
+    const q = quote('veiculo', 20_000);
+    expect(q.termMonths).toBe(60);
+    expect(brl(q.fullCents)).toBe('R$ 427,33');
+    expect(q.reducedCents).toBeNull();
+    expect(brl(headlineCents(q))).toBe('R$ 427,33');
   });
 });
 
-describe('faixas de crédito', () => {
-  it('não calcula entre R$ 30 mil e R$ 35 mil', () => {
-    expect(checkCredit('moto', 32_000)).toEqual({ ok: false, reason: 'unvalidated' });
-    expect(checkCredit('automovel', 34_999)).toEqual({ ok: false, reason: 'unvalidated' });
+describe('limite de R$ 30 mil no veículo', () => {
+  it('R$ 29.999 usa a parcela cheia de 60 meses', () => {
+    expect(ruleFor('veiculo', 29_999).id).toBe('veiculo_ate_30k');
   });
-  it('limites exatos são válidos', () => {
-    expect(checkCredit('moto', 30_000).ok).toBe(true);
-    expect(checkCredit('automovel', 35_000).ok).toBe(true);
+  it('R$ 30.000 já usa a parcela reduzida de 90 meses', () => {
+    expect(ruleFor('veiculo', 30_000).id).toBe('veiculo');
   });
-  it('sugere o tipo certo fora da faixa', () => {
-    expect(checkCredit('moto', 80_000)).toEqual({ ok: false, reason: 'above_max', suggestedPlanId: 'automovel' });
-  });
-  it('vazio', () => {
-    expect(checkCredit('imovel', null)).toEqual({ ok: false, reason: 'empty' });
+  it('imóvel ignora o limite', () => {
+    expect(ruleFor('imovel', 10_000).id).toBe('imovel');
   });
 });
 
-describe('zona de calor', () => {
-  it('exemplo do cliente: guarda R$ 10 mil e precisa de R$ 100 mil → quente', () => {
-    const r = evaluate({ planId: 'imovel', monthlyReais: 10_000, creditReais: 100_000, termMonths: 220 });
-    expect(r.fits).toBe(true);
-    expect(r.zone).toBe('quente');
-    expect(r.heat).toBe(1);
-    expect(r.tips).toEqual([]);
-  });
-  it('cabe com folga pequena → quente, informa a sobra', () => {
-    const r = evaluate({ planId: 'automovel', monthlyReais: 1_300, creditReais: 100_000, termMonths: 90 });
-    expect(r.zone).toBe('quente');
-    expect(formatCents(r.leftoverCents)).toBe('R$ 8,89');
-  });
-  it('perto (75% a 99%) → morno, com dicas concretas', () => {
-    const r = evaluate({ planId: 'automovel', monthlyReais: 1_000, creditReais: 100_000, termMonths: 90 });
-    expect(r.zone).toBe('morno');
-    expect(r.fits).toBe(false);
-    // 100 meses ainda não cabe (R$ 1.162,00), então não há dica de prazo.
-    expect(r.tips.map((t) => t.kind)).toEqual(['credit', 'monthly']);
-    const credit = r.tips.find((t) => t.kind === 'credit');
-    expect(credit && credit.kind === 'credit' && credit.creditReais).toBe(77_000);
-    const monthly = r.tips.find((t) => t.kind === 'monthly');
-    expect(monthly && monthly.kind === 'monthly' && formatCents(monthly.extraCents)).toBe('R$ 292,00');
-  });
-  it('dica de prazo maior quando ele resolve', () => {
-    const r = evaluate({ planId: 'automovel', monthlyReais: 1_200, creditReais: 100_000, termMonths: 90 });
-    const term = r.tips.find((t) => t.kind === 'term');
-    expect(term && term.kind === 'term' && term.termMonths).toBe(100);
-    expect(term && term.kind === 'term' && formatCents(term.installmentCents)).toBe('R$ 1.162,00');
-  });
-  it('longe (abaixo de 75%) → frio', () => {
-    const r = evaluate({ planId: 'automovel', monthlyReais: 500, creditReais: 100_000, termMonths: 90 });
-    expect(r.zone).toBe('frio');
-    expect(r.heat).toBeGreaterThan(0);
-    expect(r.heat).toBeLessThan(0.54);
-  });
-  it('dica de crédito some quando o que cabe fica abaixo da faixa do plano', () => {
-    const r = evaluate({ planId: 'imovel', monthlyReais: 300, creditReais: 500_000, termMonths: 220 });
-    expect(r.tips.some((t) => t.kind === 'credit')).toBe(false);
+describe('taxa de administração não é reduzida', () => {
+  it('reduzida = parte do valor + taxa inteira', () => {
+    const q = quote('imovel', 200_000);
+    // 636,36 (70% de 909,09) + 218,18 (48.000 ÷ 220)
+    expect(q.reducedCents).toBe(63_636n + 21_818n);
   });
 });
 
-describe('entrada monetária', () => {
-  it('extrai dígitos', () => {
-    expect(parseReaisInput('R$ 1.250.000')).toBe(1_250_000);
-    expect(parseReaisInput('')).toBeNull();
-    expect(parseReaisInput('000150')).toBe(150);
-  });
+describe('validação do valor', () => {
+  it('vazio', () => expect(checkValue('imovel', null)).toEqual({ ok: false, reason: 'empty' }));
+  it('abaixo do mínimo', () => expect(checkValue('imovel', 10_000)).toEqual({ ok: false, reason: 'below_min' }));
+  it('acima do máximo', () => expect(checkValue('veiculo', 5_000_000)).toEqual({ ok: false, reason: 'above_max' }));
+  it('dentro da faixa', () => expect(checkValue('veiculo', 40_000)).toEqual({ ok: true }));
 });

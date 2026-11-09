@@ -143,7 +143,8 @@ export function ChoiceGroup<T extends string | number>({
 }: {
   legend: string;
   options: Choice<T>[];
-  value: T;
+  /** null = nada escolhido ainda. */
+  value: T | null;
   onChange: (value: T) => void;
   /** Quantidade fixa de colunas (padrão: quebra livre). */
   columns?: number;
