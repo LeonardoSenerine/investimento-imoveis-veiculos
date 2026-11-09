@@ -43,13 +43,14 @@ export function Hero({ draft, onChange, onSubmit }: Props) {
           <SceneBackground objective={draft.objective} priority />
           <div
             aria-hidden="true"
-            className="absolute inset-0 bg-[linear-gradient(180deg,rgb(21_21_21/0.62)_0%,rgb(21_21_21/0.3)_38%,rgb(21_21_21/0.55)_70%,rgb(21_21_21/0.85)_100%)] lg:bg-[linear-gradient(90deg,rgb(21_21_21/0.88)_0%,rgb(21_21_21/0.55)_45%,rgb(21_21_21/0.25)_100%),linear-gradient(180deg,rgb(21_21_21/0.45)_0%,transparent_30%,transparent_70%,rgb(21_21_21/0.7)_100%)]"
+            className="absolute inset-0 bg-[linear-gradient(180deg,rgb(21_21_21/0.72)_0%,rgb(21_21_21/0.4)_26%,rgb(21_21_21/0.05)_44%,rgb(21_21_21/0.05)_58%,rgb(21_21_21/0.45)_74%,rgb(21_21_21/0.85)_100%)] lg:bg-[linear-gradient(90deg,rgb(21_21_21/0.88)_0%,rgb(21_21_21/0.55)_45%,rgb(21_21_21/0.25)_100%),linear-gradient(180deg,rgb(21_21_21/0.45)_0%,transparent_30%,transparent_70%,rgb(21_21_21/0.7)_100%)]"
           />
         </div>
       </div>
 
       <div className="relative z-[2] mx-auto grid max-w-[90rem] grid-cols-1 gap-8 px-5 pb-14 pt-24 md:px-10 md:pt-32 lg:min-h-[100svh] lg:grid-cols-12 lg:items-center lg:gap-12 lg:pb-16">
-        <div className="lg:col-span-6 xl:col-span-7">
+        {/* No celular, o bloco do título reserva uma "janela" para a foto antes do formulário. */}
+        <div className="min-h-[calc(57svh-6rem)] lg:col-span-6 lg:min-h-0 xl:col-span-7">
           <h1
             id="hero-title"
             data-hero-title
